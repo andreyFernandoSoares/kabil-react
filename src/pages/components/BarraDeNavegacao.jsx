@@ -24,6 +24,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import { Menu, SwipeableDrawer } from '@material-ui/core';
+import { Link, useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -71,8 +72,9 @@ const useStyles = makeStyles((theme) => ({
     }
   }));
 
-  export default function BarraDeNavegacao( { tipo } ) {
+export default function BarraDeNavegacao( { tipo } ) {
   const classes = useStyles();
+  let history = useHistory();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const isMenuOpen = Boolean(anchorEl);
@@ -81,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
   const [state, setState] = React.useState({
     left: false
   });
-
+  
   console.log(tipo);
 
   const handleClickOpen = () => {
@@ -91,6 +93,23 @@ const useStyles = makeStyles((theme) => ({
   const handleClose = () => {
     setOpen(false);
   };
+
+  const direcionarParaPagina = (texto) => {
+    switch(texto) {
+      case 'Atividades':
+        history.push('/atividades');
+        break;
+      case 'Admin':
+        history.push('/admin');
+        break;
+      case 'Balanço Patrimonial':
+          history.push("/balanco");
+          break;
+      case 'DRE':
+          history.push("/dre");
+          break;
+    }
+  }
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -105,12 +124,21 @@ const useStyles = makeStyles((theme) => ({
       <List>
         {['Atividades', 'Balanço Patrimonial', 'DRE'].map((text, index) => (
           <ListItem button key={text}>
-            <ListItemIcon>{text === 'Atividades' ? <AccessibilityIcon /> 
-                            : text === 'Balanço Patrimonial' ? <ListAltIcon />
-                            : <LibraryBooksIcon />
-                          }
+            <ListItemIcon onClick={(event) => {
+                  event.preventDefault();
+                  direcionarParaPagina(text);
+            }}>
+              {
+              text === 'Atividades' ? 
+                <AccessibilityIcon /> 
+                : text === 'Balanço Patrimonial' ? <ListAltIcon />
+                : <LibraryBooksIcon />
+              }
             </ListItemIcon>
-            <ListItemText primary={text} />
+            <ListItemText primary={text} onClick={(event) => {
+                event.preventDefault();
+                direcionarParaPagina(text);
+              }}/>
           </ListItem>
         ))}
       </List>
@@ -213,8 +241,11 @@ const useStyles = makeStyles((theme) => ({
                     </React.Fragment>
                 ))): null }
                 </div>
-                <Typography className={classes.title} variant="h6" noWrap>
-                Kabil
+                <Typography className={classes.title} variant="h6" noWrap onClick={(event) => {
+                      event.preventDefault();
+                      direcionarParaPagina("Admin");
+                }}>
+                  Kabil
                 </Typography>
                 <div className={classes.grow} />
                 <div className={classes.sectionDesktop}>
