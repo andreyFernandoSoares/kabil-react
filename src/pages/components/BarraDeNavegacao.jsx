@@ -4,6 +4,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
+import InsertChartIcon from '@material-ui/icons/InsertChart';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -22,9 +23,8 @@ import AccessibilityIcon from '@material-ui/icons/Accessibility';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import { Menu, SwipeableDrawer } from '@material-ui/core';
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -105,7 +105,7 @@ export default function BarraDeNavegacao( { tipo } ) {
       case 'Balanço Patrimonial':
           history.push("/balanco");
           break;
-      case 'DRE':
+      case 'Ranking':
           history.push("/dre");
           break;
     }
@@ -122,7 +122,7 @@ export default function BarraDeNavegacao( { tipo } ) {
   const list = (anchor) => (
     <div>
       <List>
-        {['Atividades', 'Balanço Patrimonial', 'DRE'].map((text, index) => (
+        {['Atividades', 'Balanço Patrimonial', 'Ranking'].map((text, index) => (
           <ListItem button key={text}>
             <ListItemIcon onClick={(event) => {
                   event.preventDefault();
@@ -132,7 +132,7 @@ export default function BarraDeNavegacao( { tipo } ) {
               text === 'Atividades' ? 
                 <AccessibilityIcon /> 
                 : text === 'Balanço Patrimonial' ? <ListAltIcon />
-                : <LibraryBooksIcon />
+                : <InsertChartIcon />
               }
             </ListItemIcon>
             <ListItemText primary={text} onClick={(event) => {
@@ -174,7 +174,7 @@ export default function BarraDeNavegacao( { tipo } ) {
       onClose={handleMenuClose}
     >
       {tipo == 'admin' ? (
-        <MenuItem onClick={handleMenuClose}>Gerar Código</MenuItem>
+        <MenuItem onClick={handleMenuClose}>Gerar Sala</MenuItem>
       ) : null }
       <MenuItem onClick={handleMenuClose}>Sair</MenuItem>
     </Menu>
