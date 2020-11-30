@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import api from '../services/api';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -30,19 +31,38 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Login() {
+export default function Login(props) {
   const classes = useStyles();
-  const [email, setEmail] = useState("");
+  const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
+  const { enqueueSnackbar }  = useSnackbar();
+  const query = props.location.search.includes("create=success");
 
-  const headers = {
-    'Content-Type': 'application/json'
-  }
+  useEffect(() => {
+    if (query) {
+      enqueueSnackbar("Cadastro realizado com sucesso!", {
+        variant: "success"
+      });
+    }
+  }, []);
 
   async function logar() {
-    let dados = { "email": email, "senha": senha }
-    let response = await api.post("/auth", dados, headers);
-    console.log(response);
+    let dados = { "nome": nome, "senha": senha }
+
+    setTimeout(() => {
+      api.post(`/auth`, dados)
+      .then(({ data }) => {
+        const token = data.tipo+" "+data.token;
+        localStorage.setItem('TOKEN_KEY', token);
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Falha ao Logar!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
   }
 
   return (
@@ -60,12 +80,11 @@ export default function Login() {
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email"
-            name="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => {setEmail(event.target.value);}}
+            id="nome"
+            label="Nome"
+            name="nome"
+            value={nome}
+            onChange={(event) => {setNome(event.target.value);}}
             autoFocus
           />
           <TextField
@@ -92,7 +111,7 @@ export default function Login() {
           </Button>
           <Grid container>
             <Grid item xs>
-                <Link href="/login" variant="body2">
+                <Link href="/cadastro" variant="body2">
                   Não possui uma conta? Crie aqui.
                 </Link>
             </Grid>

@@ -9,6 +9,8 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import api from '../services/api';
+import { useSnackbar } from 'notistack';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -35,11 +37,25 @@ export default function Cadastro() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const { enqueueSnackbar }  = useSnackbar();
+  const history = useHistory();
 
   async function cadastrar() {
     let dados = { "email": email, "nome": nome, "senha": senha }
-    let response = await api.post("/usuario/cadastro", dados);
-    console.log(response);
+
+    setTimeout(() => {
+      api.post(`/usuario/cadastro`, dados)
+      .then(({ data }) => {
+        history.push("/login?create=success");
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Falha ao Logar!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
   }
 
   return (
