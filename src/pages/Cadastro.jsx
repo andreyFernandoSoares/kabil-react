@@ -51,7 +51,7 @@ export default function Cadastro() {
       .catch((error) => {
           console.log("error");
           console.log(error);
-          enqueueSnackbar("Falha ao Logar!", {
+          enqueueSnackbar("Falha ao criar conta!", {
               variant: "error"
           });
       });

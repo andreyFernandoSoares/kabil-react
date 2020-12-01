@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -31,16 +31,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import BarraDeNavegacao from './components/BarraDeNavegacao';
 import { Container } from '@material-ui/core';
-
-function createData(name, campoCred, campoDeb) {
-  return { name, campoCred, campoDeb };
-}
-
-const rows = [
-  createData('Atividade 1', "Campo Cred", "Campo Deb"),
-  createData('Atividade 2', "Campo Cred", "Campo Deb"),
-  createData('Atividade 3', "Campo Cred", "Campo Deb"),
-];
+import api from '../services/api';
+import { useSnackbar } from 'notistack';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -69,9 +61,10 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: true, label: 'Descrição' },
-  { id: 'campoCred', numeric: true, disablePadding: false, label: 'Crédito' },
-  { id: 'campoDeb', numeric: true, disablePadding: false, label: 'Débito' },
+  { id: 'descricao', numeric: false, disablePadding: true, label: 'Descrição' },
+  { id: 'credito', numeric: false, disablePadding: true, label: 'Crédito' },
+  { id: 'debito', numeric: false, disablePadding: true, label: 'Débito' },
+  { id: 'valor', numeric: true, disablePadding: false, label: 'Valor' }
 ];
 
 function EnhancedTableHead(props) {
@@ -150,7 +143,7 @@ const useToolbarStyles = makeStyles((theme) => ({
 
 const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
-  const { numSelected, openDialog } = props;
+  const { numSelected, openDialog, deletarAtividades } = props;
 
   return (
     <Toolbar
@@ -170,7 +163,7 @@ const EnhancedTableToolbar = (props) => {
 
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton aria-label="delete">
+          <IconButton aria-label="delete" onClick={deletarAtividades}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -228,6 +221,44 @@ export default function Atividades() {
   const [open, setOpen] = React.useState(false);
   const [debito, setDebito] = React.useState('');
   const [credito, setCredito] = React.useState('');
+  const [descricao, setDescricao] = React.useState('');
+  const [valor, setValor] = React.useState(0);
+  const { enqueueSnackbar }  = useSnackbar();
+  const [dados, setDados] = React.useState([]);
+  const [auxDados, setAuxDados] = React.useState({});
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': localStorage.getItem('TOKEN_KEY')
+  }
+
+  useEffect(() => {
+    buscaAtividades();
+  }, [auxDados]);
+
+  async function buscaAtividades() {
+    setTimeout(() => {
+      api.get(`/atividade`, { headers: headers })
+      .then(({ data }) => {
+        setDados(data);
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Falha ao carregar dados!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
+  }
+  
+  const handleDescChange = (event) => {
+    setDescricao(event.target.value);
+  };
+
+  const handleValorChange = (event) => {
+    setValor(event.target.value);
+  };
 
   const handleDebitoChange = (event) => {
     setDebito(event.target.value);
@@ -236,6 +267,71 @@ export default function Atividades() {
   const handleCreditoChange = (event) => {
     setCredito(event.target.value);
   };
+
+  const deletarAtividades = async () => {
+    let listaAtividades= [];
+
+    dados.map(dado => {
+        selected.map(
+          id => {
+            if (dado.id === id) {
+              listaAtividades.push(dado);
+            }
+          }
+        )
+      }
+    );
+
+    setTimeout(() => {
+      api.delete(`/atividade`, { headers: headers, data: listaAtividades })
+      .then(({ data }) => {
+        setAuxDados({})
+        enqueueSnackbar("Atividade(s) deletada(s) com sucesso!", {
+          variant: "success"
+        });
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Falha ao deletar atividade(s)!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
+  }
+
+  const cadastraAtividade = async () => {
+    let novaAtividade = { 
+      "descricao": descricao, 
+      "debito": debito,
+      "credito": credito,
+      "valor": valor 
+    }
+
+    if (descricao !== '' && debito !==  '' && credito !==  '' && valor !==  0) {
+      setTimeout(() => {
+        api.post(`/atividade`, novaAtividade, { headers: headers })
+        .then(({ data }) => {
+          enqueueSnackbar("Atividade criada com sucesso!", {
+            variant: "success"
+          });
+          setAuxDados(novaAtividade);
+          handleClose();
+        })
+        .catch((error) => {
+            console.log("error");
+            console.log(error);
+            enqueueSnackbar("Falha ao criar atividade!", {
+                variant: "error"
+            });
+        });
+      }, 1000);
+    } else {
+      enqueueSnackbar("Preencha todos os campos!", {
+        variant: "error"
+      });
+    }
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -253,19 +349,19 @@ export default function Atividades() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
+      const newSelecteds = dados.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event, id) => {
+    const selectedIndex = selected.indexOf(id);
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -293,9 +389,9 @@ export default function Atividades() {
     setDense(event.target.checked);
   };
 
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (id) => selected.indexOf(id) !== -1;
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, dados.length - page * rowsPerPage);
 
   return (
     <Fragment>
@@ -310,6 +406,7 @@ export default function Atividades() {
                     <EnhancedTableToolbar 
                         numSelected={selected.length} 
                         openDialog={handleClickOpen} 
+                        deletarAtividades={deletarAtividades}
                     />
                     <TableContainer>
                     <Table
@@ -325,23 +422,23 @@ export default function Atividades() {
                         orderBy={orderBy}
                         onSelectAllClick={handleSelectAllClick}
                         onRequestSort={handleRequestSort}
-                        rowCount={rows.length}
+                        rowCount={dados.length}
                         />
                         <TableBody>
-                        {stableSort(rows, getComparator(order, orderBy))
+                        {stableSort(dados, getComparator(order, orderBy))
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row, index) => {
-                            const isItemSelected = isSelected(row.name);
+                            const isItemSelected = isSelected(row.id);
                             const labelId = `enhanced-table-checkbox-${index}`;
 
                             return (
                                 <TableRow
                                 hover
-                                onClick={(event) => handleClick(event, row.name)}
+                                onClick={(event) => handleClick(event, row.id)}
                                 role="checkbox"
                                 aria-checked={isItemSelected}
                                 tabIndex={-1}
-                                key={row.name}
+                                key={row.descricao}
                                 selected={isItemSelected}
                                 >
                                 <TableCell padding="checkbox">
@@ -351,10 +448,11 @@ export default function Atividades() {
                                     />
                                 </TableCell>
                                 <TableCell component="th" id={labelId} scope="row" padding="none">
-                                    {row.name}
+                                    {row.descricao}
                                 </TableCell>
-                                <TableCell align="right">{row.campoCred}</TableCell>
-                                <TableCell align="right">{row.campoDeb}</TableCell>
+                                <TableCell align="right">{row.credito}</TableCell>
+                                <TableCell align="right">{row.debito}</TableCell>
+                                <TableCell align="right">{row.valor}</TableCell>
                                 </TableRow>
                             );
                             })}
@@ -369,7 +467,7 @@ export default function Atividades() {
                     <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={rows.length}
+                    count={dados.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onChangePage={handleChangePage}
@@ -396,9 +494,11 @@ export default function Atividades() {
                     <TextField
                         autoFocus
                         margin="dense"
-                        id="name"
+                        id="descricao"
                         label="Descrição"
                         type="text"
+                        value={descricao}
+                        onChange={handleDescChange}
                         fullWidth
                     />
 
@@ -410,12 +510,12 @@ export default function Atividades() {
                             value={credito}
                             onChange={handleCreditoChange}
                         >
-                        <MenuItem value="">
-                            <em>None</em>
-                        </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
+                            <MenuItem value={"CAIXA"}>Caixa</MenuItem>
+                            <MenuItem value={"CONTASRECEBER"}>Contas à receber</MenuItem>
+                            <MenuItem value={"ESTOQUE"}>Estoque</MenuItem>
+                            <MenuItem value={"EQUIPAMENTOS"}>Equipamentos</MenuItem>
+                            <MenuItem value={"MOVEISUTENSILIOS"}>Móveis e Utensílios</MenuItem>
+                            <MenuItem value={"VEICULOS"}>Veículo</MenuItem>
                         </Select>
                     </FormControl>
 
@@ -427,20 +527,33 @@ export default function Atividades() {
                             value={debito}
                             onChange={handleDebitoChange}
                         >
-                        <MenuItem value="">
-                            <em>None</em>
-                        </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
+                            <MenuItem value={"FORNECEDORES"}>Fornecedores</MenuItem>
+                            <MenuItem value={"SALARIOS"}>Salários</MenuItem>
+                            <MenuItem value={"IMPOSTOS"}>Impostos</MenuItem>
+                            <MenuItem value={"ALUGUEL"}>Aluguel</MenuItem>
+                            <MenuItem value={"FINANCIAMENTOS"}>Financiamentos</MenuItem>
+                            <MenuItem value={"EMPRESTIMOS"}>Empréstimos</MenuItem>
                         </Select>
                     </FormControl>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="valor"
+                        label="Valor"
+                        type="number"
+                        value={valor}
+                        onChange={handleValorChange}
+                        fullWidth
+                    />
                 </DialogContent>
                 <DialogActions>
                 <Button onClick={handleClose} color="primary">
                     Cancelar
                 </Button>
-                <Button onClick={handleClose} color="primary">
+                <Button onClick={(event) => {
+                  event.preventDefault(); 
+                  cadastraAtividade();
+                }} color="primary">
                     Cadastrar
                 </Button>
                 </DialogActions>
