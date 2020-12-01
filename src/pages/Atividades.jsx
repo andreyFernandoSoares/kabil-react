@@ -62,8 +62,8 @@ function stableSort(array, comparator) {
 
 const headCells = [
   { id: 'descricao', numeric: false, disablePadding: true, label: 'Descrição' },
-  { id: 'credito', numeric: false, disablePadding: true, label: 'Crédito' },
-  { id: 'debito', numeric: false, disablePadding: true, label: 'Débito' },
+  { id: 'credito', numeric: false, disablePadding: false, label: 'Crédito' },
+  { id: 'debito', numeric: false, disablePadding: false, label: 'Débito' },
   { id: 'valor', numeric: true, disablePadding: false, label: 'Valor' }
 ];
 
@@ -285,7 +285,8 @@ export default function Atividades() {
     setTimeout(() => {
       api.delete(`/atividade`, { headers: headers, data: listaAtividades })
       .then(({ data }) => {
-        setAuxDados({})
+        setAuxDados({});
+        setSelected([]);
         enqueueSnackbar("Atividade(s) deletada(s) com sucesso!", {
           variant: "success"
         });
@@ -298,6 +299,13 @@ export default function Atividades() {
           });
       });
     }, 1000);
+  }
+
+  const limpaDados = () => {
+    setCredito('');
+    setValor(0);
+    setDescricao('');
+    setDebito('');
   }
 
   const cadastraAtividade = async () => {
@@ -315,6 +323,7 @@ export default function Atividades() {
           enqueueSnackbar("Atividade criada com sucesso!", {
             variant: "success"
           });
+          limpaDados();
           setAuxDados(novaAtividade);
           handleClose();
         })
@@ -416,13 +425,13 @@ export default function Atividades() {
                         aria-label="enhanced table"
                     >
                         <EnhancedTableHead
-                        classes={classes}
-                        numSelected={selected.length}
-                        order={order}
-                        orderBy={orderBy}
-                        onSelectAllClick={handleSelectAllClick}
-                        onRequestSort={handleRequestSort}
-                        rowCount={dados.length}
+                          classes={classes}
+                          numSelected={selected.length}
+                          order={order}
+                          orderBy={orderBy}
+                          onSelectAllClick={handleSelectAllClick}
+                          onRequestSort={handleRequestSort}
+                          rowCount={dados.length}
                         />
                         <TableBody>
                         {stableSort(dados, getComparator(order, orderBy))
@@ -450,8 +459,8 @@ export default function Atividades() {
                                 <TableCell component="th" id={labelId} scope="row" padding="none">
                                     {row.descricao}
                                 </TableCell>
-                                <TableCell align="right">{row.credito}</TableCell>
-                                <TableCell align="right">{row.debito}</TableCell>
+                                <TableCell align="left">{row.credito}</TableCell>
+                                <TableCell align="left">{row.debito}</TableCell>
                                 <TableCell align="right">{row.valor}</TableCell>
                                 </TableRow>
                             );
