@@ -63,8 +63,7 @@ function stableSort(array, comparator) {
 const headCells = [
   { id: 'descricao', numeric: false, disablePadding: true, label: 'Descrição' },
   { id: 'credito', numeric: false, disablePadding: false, label: 'Crédito' },
-  { id: 'debito', numeric: false, disablePadding: false, label: 'Débito' },
-  { id: 'valor', numeric: true, disablePadding: false, label: 'Valor' }
+  { id: 'debito', numeric: false, disablePadding: false, label: 'Débito' }
 ];
 
 function EnhancedTableHead(props) {
@@ -222,7 +221,6 @@ export default function Atividades() {
   const [debito, setDebito] = React.useState('');
   const [credito, setCredito] = React.useState('');
   const [descricao, setDescricao] = React.useState('');
-  const [valor, setValor] = React.useState(0);
   const { enqueueSnackbar }  = useSnackbar();
   const [dados, setDados] = React.useState([]);
   const [auxDados, setAuxDados] = React.useState({});
@@ -254,10 +252,6 @@ export default function Atividades() {
   
   const handleDescChange = (event) => {
     setDescricao(event.target.value);
-  };
-
-  const handleValorChange = (event) => {
-    setValor(event.target.value);
   };
 
   const handleDebitoChange = (event) => {
@@ -303,7 +297,6 @@ export default function Atividades() {
 
   const limpaDados = () => {
     setCredito('');
-    setValor(0);
     setDescricao('');
     setDebito('');
   }
@@ -312,11 +305,10 @@ export default function Atividades() {
     let novaAtividade = { 
       "descricao": descricao, 
       "debito": debito,
-      "credito": credito,
-      "valor": valor 
+      "credito": credito
     }
 
-    if (descricao !== '' && debito !==  '' && credito !==  '' && valor !==  0) {
+    if (descricao !== '' && debito !==  '' && credito !==  '') {
       setTimeout(() => {
         api.post(`/atividade`, novaAtividade, { headers: headers })
         .then(({ data }) => {
@@ -461,7 +453,6 @@ export default function Atividades() {
                                 </TableCell>
                                 <TableCell align="left">{row.credito}</TableCell>
                                 <TableCell align="left">{row.debito}</TableCell>
-                                <TableCell align="right">{row.valor}</TableCell>
                                 </TableRow>
                             );
                             })}
@@ -544,16 +535,6 @@ export default function Atividades() {
                             <MenuItem value={"EMPRESTIMOS"}>Empréstimos</MenuItem>
                         </Select>
                     </FormControl>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="valor"
-                        label="Valor"
-                        type="number"
-                        value={valor}
-                        onChange={handleValorChange}
-                        fullWidth
-                    />
                 </DialogContent>
                 <DialogActions>
                 <Button onClick={handleClose} color="primary">

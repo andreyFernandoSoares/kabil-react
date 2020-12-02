@@ -43,14 +43,19 @@ export default function BalancoPatrimonial() {
   const [balanco, setBalanco] = React.useState({});
   const { enqueueSnackbar }  = useSnackbar();
 
+  const usuarioId = parseInt(localStorage.getItem('ID_USER'));
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': localStorage.getItem('TOKEN_KEY')
   }
 
-  // useEffect(() => {
-  //   preencheBalanco();
-  // }, [auxBalanco]);
+  useEffect(() => {
+    preencheBalanco();
+  }, [auxBalanco]);
+
+  useEffect(() => {
+    iniciaValores();
+  }, [balanco]);
 
   useEffect(() => {
     setAtivoCirculante(somaAtivoCirculante());
@@ -75,7 +80,6 @@ export default function BalancoPatrimonial() {
 
   function montaDados() {
     return {
-      "id": balanco.id,
       "ativo": ativo,
       "passivo": passivo,
       "ativoCirculante": ativoCirculante,
@@ -96,73 +100,79 @@ export default function BalancoPatrimonial() {
       "emprestimos": emprestimos,
       "veiculo": veiculo,
       "patrimonioLiquido": patrimonioLiquido,
-      "capitalSocial": capitalSocial
+      "capitalSocial": capitalSocial,
+      "id": balanco.id,
+      "usuario": balanco.usuario
     }
   }
 
   function iniciaValores() {
-    if (balanco !== null) {
-      if (balanco.ativo !== null) 
+    if (balanco != null) {
+
+      console.log(balanco);
+      console.log(balanco.ativo);
+
+      if (balanco.ativo != null) 
         setAtivo(balanco.ativo);
       
-      if (balanco.passivo !== null) 
+      if (balanco.passivo != null) 
         setPassivo(balanco.passivo);
 
-      if (balanco.ativoCirculante !== null) 
+      if (balanco.ativoCirculante != null) 
         setAtivoCirculante(balanco.ativoCirculante);
 
-      if (balanco.passivoCirculante !== null) 
+      if (balanco.passivoCirculante != null) 
         setPassivoCirculante(balanco.passivoCirculante);
 
-      if (balanco.caixa !== null) 
+      if (balanco.caixa != null) 
         setCaixa(balanco.caixa);
       
-      if (balanco.fornecedores !== null) 
+      if (balanco.fornecedores != null) 
         setFornecedores(balanco.fornecedores);
       
-      if (balanco.contasAReceber !== null) 
+      if (balanco.contasAReceber != null) 
         setContasAReceber(balanco.contasAReceber);
 
-      if (balanco.salarios !== null) 
+      if (balanco.salarios != null) 
         setSalarios(balanco.salarios);
   
-      if (balanco.estoque !== null) 
+      if (balanco.estoque != null) 
         setEstoque(balanco.estoque);
 
-      if (balanco.impostos !== null) 
+      if (balanco.impostos != null) 
         setImpostos(balanco.impostos);
 
-      if (balanco.ativoNaoCirculante !== null) 
+      if (balanco.ativoNaoCirculante != null) 
         setAtivoNaoCirculante(balanco.ativoNaoCirculante);
       
-      if (balanco.aluguel !== null) 
+      if (balanco.aluguel != null) 
         setAluguel(balanco.aluguel);
       
-      if (balanco.imobilizados !== null) 
+      if (balanco.imobilizados != null) 
         setImobilizados(balanco.imobilizados);
       
-      if (balanco.passivoNaoCirculante !== null) 
+      if (balanco.passivoNaoCirculante != null) 
         setPassivoNaoCirculante(balanco.passivoNaoCirculante);
       
-      if (balanco.equipamentos !== null) 
+      if (balanco.equipamentos != null) 
         setEquipamentos(balanco.equipamentos);
       
-      if (balanco.financiamentos !== null) 
+      if (balanco.financiamentos != null) 
         setFinanciamentos(balanco.financiamentos);
       
-      if (balanco.moveisUtensilios !== null) 
+      if (balanco.moveisUtensilios != null) 
         setMoveisUtensilios(balanco.moveisUtensilios);
       
-      if (balanco.emprestimos !== null) 
+      if (balanco.emprestimos != null) 
         setEmprestimos(balanco.emprestimos);
       
-      if (balanco.veiculo !== null) 
+      if (balanco.veiculo != null) 
         setVeiculo(balanco.veiculo);
       
-      if (balanco.patrimonioLiquido !== null) 
+      if (balanco.patrimonioLiquido != null) 
         setPatrimonioLiquido(balanco.patrimonioLiquido);
       
-      if (balanco.capitalSocial !== null) 
+      if (balanco.capitalSocial != null) 
         setCapitalSocial(balanco.capitalSocial);
     }
   }
@@ -173,7 +183,7 @@ export default function BalancoPatrimonial() {
       api.put(`/balanco`, dados, { headers: headers })
       .then(({ data }) => {
         enqueueSnackbar("Balanço patrimonial alterado com sucesso!", {
-          variant: "error"
+          variant: "success"
         });
         setAuxBalanco({sucess: true})
       })
@@ -188,13 +198,11 @@ export default function BalancoPatrimonial() {
   }
 
   async function preencheBalanco() {
-    let usuarioId = localStorage.getItem('ID_USER');
+    
     setTimeout(() => {
       api.get(`/balanco/${usuarioId}`, { headers: headers })
       .then(({ data }) => {
-        console.log(data)
-        setBalanco(data)
-        //iniciaValores();
+        setBalanco(data);
       })
       .catch((error) => {
           console.log("error");
@@ -261,6 +269,7 @@ export default function BalancoPatrimonial() {
         <Grid item xs={4}>
           <strong>1.1 Ativo Circulante</strong>
           <TextField
+            id="ativoCirculante"
             className={classes.textField}
             size="small"
             disabled={true}
@@ -270,6 +279,7 @@ export default function BalancoPatrimonial() {
         <Grid item xs={4}>
         <strong>2.1 Passivo Circulante</strong>
         <TextField
+            id="passivoCirculante"
             className={classes.textField}
             size="small"
             disabled={true}
@@ -286,21 +296,21 @@ export default function BalancoPatrimonial() {
         <Grid item xs={4}>
           1.1.1 Caixa
           <TextField
+            id="caixa"
             className={classes.textField}
-            size="small"
             type="number"
             value={caixa}
-            onChange={(event) => {setCaixa(event.target.value)}}
+            onChange={(event) => {setCaixa(event.target.value);}}
           />
         </Grid>
         <Grid item xs={4}>
           2.1.1 Fornecedores
           <TextField
+            id="fornecedores"
             className={classes.textField}
-            size="small"
             type="number"
             value={fornecedores}
-            onChange={(event) => {setFornecedores(event.target.value)}}
+            onChange={(event) => {setFornecedores(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -314,10 +324,11 @@ export default function BalancoPatrimonial() {
           1.1.2 Contas à receber
           <TextField
             className={classes.textField}
+            id="contasAReceber"
             size="small"
             type="number"
             value={contasAReceber}
-            onChange={(event) => {setContasAReceber(event.target.value)}}
+            onChange={(event) => {setContasAReceber(event.target.value);}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -326,8 +337,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="salarios"
             value={salarios}
-            onChange={(event) => {setSalarios(event.target.value)}}
+            onChange={(event) => {setSalarios(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -343,8 +355,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="estoque"
             value={estoque}
-            onChange={(event) => {setEstoque(event.target.value)}}
+            onChange={(event) => {setEstoque(event.target.value);}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -353,8 +366,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="impostos"
             value={impostos}
-            onChange={(event) => {setImpostos(event.target.value)}}
+            onChange={(event) => {setImpostos(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -369,6 +383,7 @@ export default function BalancoPatrimonial() {
           <TextField
             className={classes.textField}
             size="small"
+            id="ativoNaoCirculante"
             disabled={true}
             value={ativoNaoCirculante}
           />
@@ -379,8 +394,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="aluguel"
             value={aluguel}
-            onChange={(event) => {setAluguel(event.target.value)}}
+            onChange={(event) => {setAluguel(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -395,6 +411,7 @@ export default function BalancoPatrimonial() {
           <TextField
             className={classes.textField}
             size="small"
+            id="imobilizados"
             disabled={true}
             value={imobilizados}
           />
@@ -405,6 +422,7 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             disabled={true}
+            id="passivoNaoCirculante"
             value={passivoNaoCirculante}
           />
         </Grid>
@@ -421,8 +439,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="equipamentos"
             value={equipamentos}
-            onChange={(event) => {setEquipamentos(event.target.value)}}
+            onChange={(event) => {setEquipamentos(event.target.value);}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -431,8 +450,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="financiamentos"
             value={financiamentos}
-            onChange={(event) => {setFinanciamentos(event.target.value)}}
+            onChange={(event) => {setFinanciamentos(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -449,7 +469,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             value={moveisUtensilios}
-            onChange={(event) => {setMoveisUtensilios(event.target.value)}}
+            id="moveisUtensilios"
+            onChange={(event) => {setMoveisUtensilios(event.target.value);}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -458,8 +479,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="emprestimos"
             value={emprestimos}
-            onChange={(event) => {setEmprestimos(event.target.value)}}
+            onChange={(event) => {setEmprestimos(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -475,8 +497,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="veiculo"
             value={veiculo}
-            onChange={(event) => {setVeiculo(event.target.value)}}
+            onChange={(event) => {setVeiculo(event.target.value);}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -484,6 +507,7 @@ export default function BalancoPatrimonial() {
           <TextField
             className={classes.textField}
             size="small"
+            id="patrimonioLiquido"
             disabled={true}
             value={patrimonioLiquido}
           />
@@ -500,6 +524,7 @@ export default function BalancoPatrimonial() {
             variant="contained" 
             color="primary" 
             type="submit"
+            id="gravar"
             onClick={(event) => {event.preventDefault(); gravaBalanco();}}
             fullWidth>
             Gravar
@@ -511,8 +536,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
+            id="capitalSocial"
             value={capitalSocial}
-            onChange={(event) => {setCapitalSocial(event.target.value); setPatrimonioLiquido(event.target.value)}}
+            onChange={(event) => {setCapitalSocial(event.target.value); setPatrimonioLiquido(event.target.value);}}
           />
         </Grid>
       </React.Fragment>

@@ -84,8 +84,6 @@ export default function BarraDeNavegacao( { tipo } ) {
     left: false
   });
   
-  console.log(tipo);
-
   const handleClickOpen = () => {
     setOpen(true);
   };
