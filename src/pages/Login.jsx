@@ -54,6 +54,7 @@ export default function Login(props) {
       .then(({ data }) => {
         const token = data.tipo+" "+data.token;
         localStorage.setItem('TOKEN_KEY', token);
+        localStorage.setItem('ID_USER', data.usuarioId);
       })
       .catch((error) => {
           console.log("error");
