@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -25,6 +25,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Menu, SwipeableDrawer } from '@material-ui/core';
 import { useHistory } from "react-router-dom";
+import api from '../../services/api';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -79,17 +81,38 @@ export default function BarraDeNavegacao( { tipo } ) {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const isMenuOpen = Boolean(anchorEl);
   const [open, setOpen] = React.useState(false);
+  const [openDialogCodigo, setOpenDialogCodigo] = React.useState(false);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const [codigoSala, setCodigoSala] = React.useState('');
+  const [codigoSalaAux, setCodigoSalaAux] = React.useState('');
   const [state, setState] = React.useState({
     left: false
   });
+  const { enqueueSnackbar }  = useSnackbar();
+  const usuarioId = localStorage.getItem('ID_USER');
+
+  const headers = {
+    'Authorization': localStorage.getItem('TOKEN_KEY')
+  }
   
+  useEffect(() => {
+    buscaCodigo();
+  }, [codigoSalaAux]);
+
   const handleClickOpen = () => {
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleOpenDialogCodigo = () => {
+    setOpenDialogCodigo(true);
+  };
+
+  const handleCloseDialogCodigo = () => {
+    setOpenDialogCodigo(false);
   };
 
   const direcionarParaPagina = (texto) => {
@@ -101,11 +124,16 @@ export default function BarraDeNavegacao( { tipo } ) {
         history.push('/admin');
         break;
       case 'Balanço Patrimonial':
-          history.push("/balanco");
-          break;
+        history.push("/balanco");
+        break;
       case 'Ranking':
-          history.push("/dre");
-          break;
+        history.push("/dre");
+        break;
+      case 'Login':
+        history.push('/login')
+        break;
+      default:
+        break;
     }
   }
 
@@ -151,10 +179,50 @@ export default function BarraDeNavegacao( { tipo } ) {
     setMobileMoreAnchorEl(null);
   };
 
+  const buscaCodigo = async () => {
+    setTimeout(() => {
+      api.get(`/sala/${usuarioId}`, { headers: headers })
+      .then(({ data }) => {
+        setCodigoSala(data)
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+      });
+    }, 1000);
+  }
+
+  const criaSala = async () => {
+    setTimeout(() => {
+      api.post(`/sala/${usuarioId}`, {}, { headers: headers })
+      .then(({ data }) => {
+        setCodigoSalaAux(data);
+        enqueueSnackbar("Sua sala está ativa! Seu codigo é "+data, {
+            variant: "success"
+        });
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Você já possui uma sala ativa!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
+    handleMenuClose();
+  }
+
+  const logout = () => {
+    localStorage.removeItem('TOKEN_KEY');
+    localStorage.removeItem('ID_USER');
+    handleMenuClose();
+    direcionarParaPagina("Login");
+  };
+
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
-  };
+  }
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -172,9 +240,14 @@ export default function BarraDeNavegacao( { tipo } ) {
       onClose={handleMenuClose}
     >
       {tipo == 'admin' ? (
-        <MenuItem onClick={handleMenuClose}>Gerar Sala</MenuItem>
+        codigoSala == '' ?
+          (
+            <MenuItem onClick={criaSala}>Gerar Sala</MenuItem>
+          ) : (
+            <MenuItem onClick={handleOpenDialogCodigo}>Visualizar código</MenuItem>
+          )
       ) : null }
-      <MenuItem onClick={handleMenuClose}>Sair</MenuItem>
+      <MenuItem onClick={logout}>Sair</MenuItem>
     </Menu>
   );
 
@@ -287,14 +360,34 @@ export default function BarraDeNavegacao( { tipo } ) {
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
-            <DialogTitle id="alert-dialog-title">{"Como Jogar"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{"Como jogar"}</DialogTitle>
             <DialogContent>
             <DialogContentText id="alert-dialog-description">
-                Jogando. Capaz gurizedo tem que se top dos game ta ligado ...
+              Jogando. Capaz gurizedo tem que se top dos game ta ligado ...
             </DialogContentText>
             </DialogContent>
             <DialogActions>
             <Button onClick={handleClose} color="primary" autoFocus>
+                Sair
+            </Button>
+            </DialogActions>
+        </Dialog>
+
+        <Dialog
+            open={openDialogCodigo}
+            onClose={handleCloseDialogCodigo}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle id="alert-dialog-title">{"Aqui está o seu código!"}</DialogTitle>
+            <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              {"Use este código para distribuir aos jogadores e se divirta, seu código é: "+codigoSala}
+                
+            </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleCloseDialogCodigo} color="primary" autoFocus>
                 Sair
             </Button>
             </DialogActions>

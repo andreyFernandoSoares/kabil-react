@@ -598,7 +598,6 @@ export default function BalancoPatrimonial() {
             </div>
           </form>
         </Container>
-          
     </Fragment>
   );
 }

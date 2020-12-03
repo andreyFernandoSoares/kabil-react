@@ -7,6 +7,9 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import { Box } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
+import imgAtividade from '../../images/atividade.png'
+import imgBalanco from '../../images/balanco.jpg'
+import imgDre from '../../images/dre.jpg'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -55,6 +58,7 @@ export default function Cards() {
                 }}>
                     <CardMedia
                         className={classes.media}
+                        image={imgAtividade}
                     />
                     <CardContent>
                         <Typography gutterBottom variant="h5" component="h2">
@@ -75,7 +79,7 @@ export default function Cards() {
                 }}>
                     <CardMedia
                         className={classes.media}
-                        image="/static/images/cards/contemplative-reptile.jpg"
+                        image={imgBalanco}
                         title="Contemplative Reptile"
                     />
                     <CardContent>
@@ -97,8 +101,8 @@ export default function Cards() {
                 }}>
                     <CardMedia
                         className={classes.media}
+                        image={imgDre}
                     >
-
                     </CardMedia>
                     <CardContent>
                         <Typography gutterBottom variant="h5" component="h2">

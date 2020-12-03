@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import api from '../services/api';
 import { useSnackbar } from 'notistack';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -33,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Login(props) {
   const classes = useStyles();
+  const history = useHistory();
   const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
   const { enqueueSnackbar }  = useSnackbar();
@@ -55,6 +57,7 @@ export default function Login(props) {
         const token = data.tipo+" "+data.token;
         localStorage.setItem('TOKEN_KEY', token);
         localStorage.setItem('ID_USER', data.usuarioId);
+        history.push("/admin");
       })
       .catch((error) => {
           console.log("error");
