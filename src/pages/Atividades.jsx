@@ -62,8 +62,8 @@ function stableSort(array, comparator) {
 
 const headCells = [
   { id: 'descricao', numeric: false, disablePadding: true, label: 'Descrição' },
-  { id: 'credito', numeric: false, disablePadding: false, label: 'Crédito' },
-  { id: 'debito', numeric: false, disablePadding: false, label: 'Débito' }
+  { id: 'ativo', numeric: false, disablePadding: false, label: 'Ativo' },
+  { id: 'passivo', numeric: false, disablePadding: false, label: 'Passivo' }
 ];
 
 function EnhancedTableHead(props) {
@@ -218,8 +218,8 @@ export default function Atividades() {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [open, setOpen] = React.useState(false);
-  const [debito, setDebito] = React.useState('');
-  const [credito, setCredito] = React.useState('');
+  const [passivo, setPassivo] = React.useState('');
+  const [ativo, setAtivo] = React.useState('');
   const [descricao, setDescricao] = React.useState('');
   const { enqueueSnackbar }  = useSnackbar();
   const [dados, setDados] = React.useState([]);
@@ -254,12 +254,12 @@ export default function Atividades() {
     setDescricao(event.target.value);
   };
 
-  const handleDebitoChange = (event) => {
-    setDebito(event.target.value);
+  const handlePassivoChange = (event) => {
+    setPassivo(event.target.value);
   };
 
-  const handleCreditoChange = (event) => {
-    setCredito(event.target.value);
+  const handleAtivoChange = (event) => {
+    setAtivo(event.target.value);
   };
 
   const deletarAtividades = async () => {
@@ -296,19 +296,19 @@ export default function Atividades() {
   }
 
   const limpaDados = () => {
-    setCredito('');
+    setAtivo('');
     setDescricao('');
-    setDebito('');
+    setPassivo('');
   }
 
   const cadastraAtividade = async () => {
     let novaAtividade = { 
       "descricao": descricao, 
-      "debito": debito,
-      "credito": credito
+      "passsivo": passivo,
+      "ativo": ativo
     }
 
-    if (descricao !== '' && debito !==  '' && credito !==  '') {
+    if (descricao !== '' && passivo !==  '' && ativo !==  '') {
       setTimeout(() => {
         api.post(`/atividade`, novaAtividade, { headers: headers })
         .then(({ data }) => {
@@ -451,8 +451,8 @@ export default function Atividades() {
                                 <TableCell component="th" id={labelId} scope="row" padding="none">
                                     {row.descricao}
                                 </TableCell>
-                                <TableCell align="left">{row.credito}</TableCell>
-                                <TableCell align="left">{row.debito}</TableCell>
+                                <TableCell align="left">{row.ativo}</TableCell>
+                                <TableCell align="left">{row.passivo}</TableCell>
                                 </TableRow>
                             );
                             })}
@@ -507,8 +507,8 @@ export default function Atividades() {
                         <Select
                             labelId="demo-controlled-open-select-label"
                             id="demo-controlled-open-select"
-                            value={credito}
-                            onChange={handleCreditoChange}
+                            value={ativo}
+                            onChange={handleAtivoChange}
                         >
                             <MenuItem value={"CAIXA"}>Caixa</MenuItem>
                             <MenuItem value={"CONTASRECEBER"}>Contas à receber</MenuItem>
@@ -524,8 +524,8 @@ export default function Atividades() {
                         <Select
                             labelId="demo-controlled-open-select-label"
                             id="demo-controlled-open-select"
-                            value={debito}
-                            onChange={handleDebitoChange}
+                            value={passivo}
+                            onChange={handlePassivoChange}
                         >
                             <MenuItem value={"FORNECEDORES"}>Fornecedores</MenuItem>
                             <MenuItem value={"SALARIOS"}>Salários</MenuItem>

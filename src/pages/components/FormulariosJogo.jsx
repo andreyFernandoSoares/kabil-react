@@ -3,16 +3,6 @@ import React, { Fragment } from 'react';
 import BarraDeNavegacao from './BarraDeNavegacao';
 
 const useStyles = makeStyles((theme) => ({
-    paper: {
-      marginTop: theme.spacing(8),
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-    },
-    avatar: {
-      margin: theme.spacing(1),
-      backgroundColor: theme.palette.secondary.main,
-    },
     form: {
       width: '100%', // Fix IE 11 issue.
       marginTop: theme.spacing(1),
@@ -26,6 +16,15 @@ export default function FormulariosJogo({ atividade, gravarJogada}) {
     const classes = useStyles();
     const [valor, setValor] = React.useState(0);
 
+    function montaDados() {
+        let dados = {
+            "ativo": atividade.ativo,
+            "passivo": atividade.passivo,
+            "valor": valor
+        }
+        gravarJogada(dados);
+    }
+
     return (
         <Fragment>
             <BarraDeNavegacao tipo={"jogador"}/>
@@ -35,7 +34,7 @@ export default function FormulariosJogo({ atividade, gravarJogada}) {
                     <Typography variant="h6">
                         {atividade.descricao}
                     </Typography>
-                    <form className={classes.form} >
+                    <form className={classes.form} onSubmit={(event) => {event.preventDefault(); montaDados();}}>
                         <TextField
                             variant="outlined"
                             margin="normal"

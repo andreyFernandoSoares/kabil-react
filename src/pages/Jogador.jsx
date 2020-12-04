@@ -4,12 +4,14 @@ import { useSnackbar } from 'notistack';
 import api from '../services/api';
 import FormulariosJogo from './components/FormulariosJogo';
 import { Step, StepLabel, Stepper } from '@material-ui/core';
+import FinalizarPartida from './components/FinalizarPartida';
 
 export default function Jogador() {
   const [atividades, setAtividades] = React.useState([]);
   const [formularios, setFormularios] = React.useState([]);
   const [etapaAtual, setEtapaAtual] = React.useState(0);
   const { enqueueSnackbar }  = useSnackbar();
+  const jogadorId = parseInt(localStorage.getItem('ID_PLAYER'));
 
   useEffect(() => {
     buscaAtividades();
@@ -35,16 +37,28 @@ export default function Jogador() {
   function montaFormularios() {
     let listaFormularios = [];
 
-    for (let atividade in atividades) {
+    for (let atividade in atividades) 
       listaFormularios.push(<FormulariosJogo atividade={atividade} gravarJogada={gravarJogada}/>);
-    }
+  
+    listaFormularios.push(<FinalizarPartida />);
 
     setFormularios(listaFormularios);
   }
 
   async function gravarJogada(dados) {
-    let i =0;
-    proximo();
+    setTimeout(() => {
+      api.put(`/jogador/${jogadorId}`, dados)
+      .then(({ data }) => {
+        proximo();
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Falha ao enviar dados!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
   }
 
   function proximo() {
@@ -57,7 +71,10 @@ export default function Jogador() {
 
         <Stepper activeStep={etapaAtual}>
           {formularios.map((text, index) => {
-            <Step><StepLabel>Atividade {index}</StepLabel></Step>
+            index != 10 ?
+              <Step><StepLabel>Atividade {index+1}</StepLabel></Step>
+            : 
+              <Step><StepLabel>Finalizar</StepLabel></Step>
           })}
         </Stepper>
         {formularios[etapaAtual]}
