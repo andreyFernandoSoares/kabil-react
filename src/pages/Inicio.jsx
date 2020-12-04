@@ -8,6 +8,9 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { useSnackbar } from 'notistack';
+import api from '../services/api';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -32,6 +35,28 @@ const useStyles = makeStyles((theme) => ({
 export default function Inicio() {
   const classes = useStyles();
   const [codigo, setCodigo] = useState("");
+  const [nome, setNome] = useState("");
+  const { enqueueSnackbar }  = useSnackbar();
+  const history = useHistory();
+
+  function criaJogador() {
+    let dados = {"nome": nome, "codigo": codigo}
+    console.log(dados)
+    setTimeout(() => {
+      api.post(`/jogador`, dados)
+      .then(({ data }) => {
+        localStorage.setItem("ID_PLAYER", data);
+        history.push("/kabil");
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Falha ao iniciar jogo!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -42,16 +67,29 @@ export default function Inicio() {
         <Typography component="h1" variant="h5">
             Web Kabil
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} onSubmit={(event) => {event.preventDefault(); criaJogador();}}>
+        <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="nome"
+            label="Nome"
+            name="nome"
+            autoComplete="nome"
+            value={nome}
+            onChange={(event) => {setNome(event.target.value);}}
+            autoFocus
+          />
           <TextField
             variant="outlined"
             margin="normal"
             required
             fullWidth
-            id="email"
+            id="codigo"
             label="Codigo"
-            name="email"
-            autoComplete="email"
+            name="codigo"
+            autoComplete="codigo"
             value={codigo}
             onChange={(event) => {setCodigo(event.target.value);}}
             autoFocus

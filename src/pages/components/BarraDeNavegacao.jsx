@@ -27,6 +27,7 @@ import { Menu, SwipeableDrawer } from '@material-ui/core';
 import { useHistory } from "react-router-dom";
 import api from '../../services/api';
 import { useSnackbar } from 'notistack';
+import BalancoJogador from './BalancoJogador';
 
 const useStyles = makeStyles((theme) => ({
     grow: {
@@ -85,6 +86,7 @@ export default function BarraDeNavegacao( { tipo } ) {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const [codigoSala, setCodigoSala] = React.useState('');
   const [codigoSalaAux, setCodigoSalaAux] = React.useState('');
+  const [openDialogBalanco, setOpenDialogBalanco] = React.useState(false);
   const [state, setState] = React.useState({
     left: false
   });
@@ -115,6 +117,14 @@ export default function BarraDeNavegacao( { tipo } ) {
     setOpenDialogCodigo(false);
   };
 
+  const handleOpenDialogBalanco = () => {
+    setOpenDialogBalanco(true);
+  };
+
+  const handleCloseDialogBalanco = () => {
+    setOpenDialogBalanco(false);
+  };
+
   const direcionarParaPagina = (texto) => {
     switch(texto) {
       case 'Atividades':
@@ -130,7 +140,10 @@ export default function BarraDeNavegacao( { tipo } ) {
         history.push("/dre");
         break;
       case 'Login':
-        history.push('/login')
+        if (tipo == "admin")
+          history.push('/login');
+        else
+          history.push('/inicio');  
         break;
       default:
         break;
@@ -246,7 +259,7 @@ export default function BarraDeNavegacao( { tipo } ) {
           ) : (
             <MenuItem onClick={handleOpenDialogCodigo}>Visualizar código</MenuItem>
           )
-      ) : null }
+      ) : <MenuItem onClick={handleOpenDialogBalanco}>Balanço Patrimonial</MenuItem> }
       <MenuItem onClick={logout}>Sair</MenuItem>
     </Menu>
   );
@@ -372,7 +385,10 @@ export default function BarraDeNavegacao( { tipo } ) {
             </Button>
             </DialogActions>
         </Dialog>
+        {/* ------ Fim Dicas ----- */}
 
+
+        {/* ------ Inicio Codigo ----- */}        
         <Dialog
             open={openDialogCodigo}
             onClose={handleCloseDialogCodigo}
@@ -392,7 +408,29 @@ export default function BarraDeNavegacao( { tipo } ) {
             </Button>
             </DialogActions>
         </Dialog>
-        {/* ------ Fim Dicas ----- */}
+        {/* ------ Fim Codigo ----- */}
+
+
+        {/* ------ Inicio Balanco Patrimonial ----- */}        
+        <Dialog
+            open={openDialogBalanco}
+            onClose={handleCloseDialogBalanco}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogTitle id="alert-dialog-title">{"Balanço Patrimonial"}</DialogTitle>
+            <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              <BalancoJogador />
+            </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+            <Button onClick={handleCloseDialogBalanco} color="primary" autoFocus>
+                Sair
+            </Button>
+            </DialogActions>
+        </Dialog>
+        {/* ------ Fim Balanco Patrimonial ----- */}
     </div>
   )
 }

@@ -1,8 +1,8 @@
-import { Button, Container, Grid, makeStyles, TextField, Typography } from '@material-ui/core';
+import { Container, Grid, makeStyles, TextField } from '@material-ui/core';
 import React, { Fragment, useEffect } from 'react';
-import api from '../services/api';
-import BarraDeNavegacao from './components/BarraDeNavegacao';
+import BarraDeNavegacao from './BarraDeNavegacao';
 import { useSnackbar } from 'notistack';
+import api from '../../services/api';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -16,190 +16,21 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function BalancoPatrimonial() {
+export default function BalancoJogador() {
   const classes = useStyles();
-  const [ativo, setAtivo] = React.useState(0);
-  const [passivo, setPassivo] = React.useState(0);
-  const [passivoCirculante, setPassivoCirculante] = React.useState(0);
-  const [ativoCirculante, setAtivoCirculante] = React.useState(0);
-  const [caixa, setCaixa] = React.useState(0);
-  const [fornecedores, setFornecedores] = React.useState(0);
-  const [contasAReceber, setContasAReceber] = React.useState(0);
-  const [salarios, setSalarios] = React.useState(0);
-  const [estoque, setEstoque] = React.useState(0);
-  const [impostos, setImpostos] = React.useState(0);
-  const [ativoNaoCirculante, setAtivoNaoCirculante] = React.useState(0);
-  const [aluguel, setAluguel] = React.useState(0);
-  const [imobilizados, setImobilizados] = React.useState(0);
-  const [equipamentos, setEquipamentos] = React.useState(0);
-  const [passivoNaoCirculante, setPassivoNaoCirculante] = React.useState(0);
-  const [financiamentos, setFinanciamentos] = React.useState(0);
-  const [moveisUtensilios, setMoveisUtensilios] = React.useState(0);
-  const [emprestimos, setEmprestimos] = React.useState(0);
-  const [veiculo, setVeiculo] = React.useState(0);
-  const [patrimonioLiquido, setPatrimonioLiquido] = React.useState(0);
-  const [capitalSocial, setCapitalSocial] = React.useState(0);
-  const [auxBalanco, setAuxBalanco] = React.useState({});
   const [balanco, setBalanco] = React.useState({});
   const { enqueueSnackbar }  = useSnackbar();
 
-  const usuarioId = parseInt(localStorage.getItem('ID_USER'));
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': localStorage.getItem('TOKEN_KEY')
-  }
+  const jogadorId = parseInt(localStorage.getItem('ID_PLAYER'));
 
   useEffect(() => {
     preencheBalanco();
-  }, [auxBalanco]);
-
-  useEffect(() => {
-    iniciaValores();
-  }, [balanco]);
-
-  useEffect(() => {
-    setAtivoCirculante(somaAtivoCirculante());
-    setAtivo(somaAtivo());
-  }, [caixa, contasAReceber, estoque]);
-
-  useEffect(() => {
-    setAtivoNaoCirculante(somaAtivoNaoCirculante());
-    setImobilizados(somaAtivoNaoCirculante());
-    setAtivo(somaAtivo());
-  }, [equipamentos, moveisUtensilios, veiculo]);
-
-  useEffect(() => {
-    setPassivoCirculante(somaPassivoCirculante());
-    setPassivo(somaPassivo());
-  }, [fornecedores, salarios, impostos, aluguel]);
-
-  useEffect(() => {
-    setPassivoNaoCirculante(somaPassivoNaoCirculante());
-    setPassivo(somaPassivo());
-  }, [financiamentos, emprestimos]);
-
-  function montaDados() {
-    return {
-      "ativo": ativo,
-      "passivo": passivo,
-      "ativoCirculante": ativoCirculante,
-      "passivoCirculante": passivoCirculante,
-      "caixa": caixa,
-      "fornecedores": fornecedores,
-      "contasAReceber": contasAReceber,
-      "salarios": salarios,
-      "estoque": estoque,
-      "impostos": impostos,
-      "ativoNaoCirculante": ativoNaoCirculante,
-      "aluguel": aluguel,
-      "imobilizados": imobilizados,
-      "passivoNaoCirculante": passivoNaoCirculante,
-      "equipamentos": equipamentos,
-      "financiamentos": financiamentos,
-      "moveisUtensilios": moveisUtensilios,
-      "emprestimos": emprestimos,
-      "veiculo": veiculo,
-      "patrimonioLiquido": patrimonioLiquido,
-      "capitalSocial": capitalSocial,
-      "id": balanco.id
-    }
-  }
-
-  function iniciaValores() {
-    if (balanco != null) {
-
-      console.log(balanco);
-      console.log(balanco.ativo);
-
-      if (balanco.ativo != null) 
-        setAtivo(balanco.ativo);
-      
-      if (balanco.passivo != null) 
-        setPassivo(balanco.passivo);
-
-      if (balanco.ativoCirculante != null) 
-        setAtivoCirculante(balanco.ativoCirculante);
-
-      if (balanco.passivoCirculante != null) 
-        setPassivoCirculante(balanco.passivoCirculante);
-
-      if (balanco.caixa != null) 
-        setCaixa(balanco.caixa);
-      
-      if (balanco.fornecedores != null) 
-        setFornecedores(balanco.fornecedores);
-      
-      if (balanco.contasAReceber != null) 
-        setContasAReceber(balanco.contasAReceber);
-
-      if (balanco.salarios != null) 
-        setSalarios(balanco.salarios);
-  
-      if (balanco.estoque != null) 
-        setEstoque(balanco.estoque);
-
-      if (balanco.impostos != null) 
-        setImpostos(balanco.impostos);
-
-      if (balanco.ativoNaoCirculante != null) 
-        setAtivoNaoCirculante(balanco.ativoNaoCirculante);
-      
-      if (balanco.aluguel != null) 
-        setAluguel(balanco.aluguel);
-      
-      if (balanco.imobilizados != null) 
-        setImobilizados(balanco.imobilizados);
-      
-      if (balanco.passivoNaoCirculante != null) 
-        setPassivoNaoCirculante(balanco.passivoNaoCirculante);
-      
-      if (balanco.equipamentos != null) 
-        setEquipamentos(balanco.equipamentos);
-      
-      if (balanco.financiamentos != null) 
-        setFinanciamentos(balanco.financiamentos);
-      
-      if (balanco.moveisUtensilios != null) 
-        setMoveisUtensilios(balanco.moveisUtensilios);
-      
-      if (balanco.emprestimos != null) 
-        setEmprestimos(balanco.emprestimos);
-      
-      if (balanco.veiculo != null) 
-        setVeiculo(balanco.veiculo);
-      
-      if (balanco.patrimonioLiquido != null) 
-        setPatrimonioLiquido(balanco.patrimonioLiquido);
-      
-      if (balanco.capitalSocial != null) 
-        setCapitalSocial(balanco.capitalSocial);
-    }
-  }
-
-  async function gravaBalanco() {
-    let dados = montaDados();
-    setTimeout(() => {
-      api.put(`/balanco`, dados, { headers: headers })
-      .then(({ data }) => {
-        enqueueSnackbar("Balanço patrimonial alterado com sucesso!", {
-          variant: "success"
-        });
-        setAuxBalanco({sucess: true})
-      })
-      .catch((error) => {
-          console.log("error");
-          console.log(error);
-          enqueueSnackbar("Falha ao alterar Balanço patrimonial !", {
-              variant: "error"
-          });
-      });
-    }, 1000);
-  }
+  }, []);
 
   async function preencheBalanco() {
     
     setTimeout(() => {
-      api.get(`/balanco/${usuarioId}`, { headers: headers })
+      api.get(`/balanco/${jogadorId}`)
       .then(({ data }) => {
         setBalanco(data);
       })
@@ -213,30 +44,6 @@ export default function BalancoPatrimonial() {
     }, 1000);
   }
 
-  function somaPassivo() {
-    return somaPassivoCirculante() + somaPassivoNaoCirculante();
-  }
-
-  function somaPassivoNaoCirculante() {
-    return parseFloat(financiamentos) + parseFloat(emprestimos);
-  }
-
-  function somaPassivoCirculante() {
-    return parseFloat(fornecedores) + parseFloat(salarios) + parseFloat(impostos) + parseFloat(aluguel);
-  }
-
-  function somaAtivoCirculante() {
-    return parseFloat(caixa) + parseFloat(contasAReceber) + parseFloat(estoque);
-  }
-
-  function somaAtivoNaoCirculante() {
-    return parseFloat(equipamentos) + parseFloat(moveisUtensilios) + parseFloat(veiculo);
-  }
-
-  function somaAtivo() {
-    return somaAtivoCirculante() + somaAtivoNaoCirculante();
-  }
-
   function AtivoAndPassivo() {
     return (
       <React.Fragment>
@@ -246,7 +53,7 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             disabled={true}
-            value={ativo}
+            value={balanco.ativo}
           />
         </Grid>
         <Grid item xs={4}>
@@ -255,7 +62,7 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             disabled={true}
-            value={passivo}
+            value={balanco.passivo}
           />
         </Grid>
       </React.Fragment>
@@ -272,7 +79,7 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             disabled={true}
-            value={ativoCirculante}
+            value={balanco.ativoCirculante}
           />
         </Grid>
         <Grid item xs={4}>
@@ -282,7 +89,7 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             disabled={true}
-            value={passivoCirculante}
+            value={balanco.passivoCirculante}
           />
         </Grid>
       </React.Fragment>
@@ -298,8 +105,8 @@ export default function BalancoPatrimonial() {
             id="caixa"
             className={classes.textField}
             type="number"
-            value={caixa}
-            onChange={(event) => {setCaixa(event.target.value);}}
+            disabled={true}
+            value={balanco.caixa}
           />
         </Grid>
         <Grid item xs={4}>
@@ -308,8 +115,8 @@ export default function BalancoPatrimonial() {
             id="fornecedores"
             className={classes.textField}
             type="number"
-            value={fornecedores}
-            onChange={(event) => {setFornecedores(event.target.value);}}
+            disabled={true}
+            value={balanco.fornecedores}
           />
         </Grid>
       </React.Fragment>
@@ -326,8 +133,8 @@ export default function BalancoPatrimonial() {
             id="contasAReceber"
             size="small"
             type="number"
-            value={contasAReceber}
-            onChange={(event) => {setContasAReceber(event.target.value);}}
+            disabled={true}
+            value={balanco.contasAReceber}
           />
         </Grid>
         <Grid item xs={4}>
@@ -337,8 +144,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="salarios"
-            value={salarios}
-            onChange={(event) => {setSalarios(event.target.value);}}
+            disabled={true}
+            value={balanco.salarios}
           />
         </Grid>
       </React.Fragment>
@@ -355,8 +162,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="estoque"
-            value={estoque}
-            onChange={(event) => {setEstoque(event.target.value);}}
+            disabled={true}
+            value={balanco.estoque}
           />
         </Grid>
         <Grid item xs={4}>
@@ -366,8 +173,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="impostos"
-            value={impostos}
-            onChange={(event) => {setImpostos(event.target.value);}}
+            disabled={true}
+            value={balanco.impostos}
           />
         </Grid>
       </React.Fragment>
@@ -384,7 +191,7 @@ export default function BalancoPatrimonial() {
             size="small"
             id="ativoNaoCirculante"
             disabled={true}
-            value={ativoNaoCirculante}
+            value={balanco.ativoNaoCirculante}
           />
         </Grid>
         <Grid item xs={4}>
@@ -394,8 +201,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="aluguel"
-            value={aluguel}
-            onChange={(event) => {setAluguel(event.target.value);}}
+            disabled={true}
+            value={balanco.aluguel}
           />
         </Grid>
       </React.Fragment>
@@ -412,7 +219,7 @@ export default function BalancoPatrimonial() {
             size="small"
             id="imobilizados"
             disabled={true}
-            value={imobilizados}
+            value={balanco.imobilizados}
           />
         </Grid>
         <Grid item xs={4}>
@@ -422,7 +229,7 @@ export default function BalancoPatrimonial() {
             size="small"
             disabled={true}
             id="passivoNaoCirculante"
-            value={passivoNaoCirculante}
+            value={balanco.passivoNaoCirculante}
           />
         </Grid>
       </React.Fragment>
@@ -439,8 +246,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="equipamentos"
-            value={equipamentos}
-            onChange={(event) => {setEquipamentos(event.target.value);}}
+            disabled={true}
+            value={balanco.equipamentos}
           />
         </Grid>
         <Grid item xs={4}>
@@ -450,8 +257,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="financiamentos"
-            value={financiamentos}
-            onChange={(event) => {setFinanciamentos(event.target.value);}}
+            disabled={true}
+            value={balanco.financiamentos}
           />
         </Grid>
       </React.Fragment>
@@ -467,9 +274,9 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             size="small"
             type="number"
-            value={moveisUtensilios}
+            value={balanco.moveisUtensilios}
             id="moveisUtensilios"
-            onChange={(event) => {setMoveisUtensilios(event.target.value);}}
+            disabled={true}
           />
         </Grid>
         <Grid item xs={4}>
@@ -479,8 +286,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="emprestimos"
-            value={emprestimos}
-            onChange={(event) => {setEmprestimos(event.target.value);}}
+            value={balanco.emprestimos}
+            disabled={true}
           />
         </Grid>
       </React.Fragment>
@@ -497,8 +304,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="veiculo"
-            value={veiculo}
-            onChange={(event) => {setVeiculo(event.target.value);}}
+            value={balanco.veiculo}
+            disabled={true}
           />
         </Grid>
         <Grid item xs={4}>
@@ -508,7 +315,8 @@ export default function BalancoPatrimonial() {
             size="small"
             id="patrimonioLiquido"
             disabled={true}
-            value={patrimonioLiquido}
+            value={balanco.patrimonioLiquido}
+            disabled={true}
           />
         </Grid>
       </React.Fragment>
@@ -519,15 +327,6 @@ export default function BalancoPatrimonial() {
     return (
       <React.Fragment>
         <Grid item xs={4}>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            type="submit"
-            id="gravar"
-            onClick={(event) => {event.preventDefault(); gravaBalanco();}}
-            fullWidth>
-            Gravar
-          </Button>
         </Grid>
         <Grid item xs={4}>
             3.1 Capital social
@@ -536,8 +335,8 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="capitalSocial"
-            value={capitalSocial}
-            onChange={(event) => {setCapitalSocial(event.target.value); setPatrimonioLiquido(event.target.value);}}
+            value={balanco.capitalSocial}
+            disabled={true}
           />
         </Grid>
       </React.Fragment>
@@ -549,14 +348,6 @@ export default function BalancoPatrimonial() {
         <BarraDeNavegacao tipo={"admin"}/>
 
         <Container className={classes.container} maxWidth="ls">
-          <Typography 
-              gutterBottom 
-              variant="h5" 
-              component="h2"
-              align="center"
-              > Balanço Patrimonial 
-          </Typography>
-
           <form>
             <div className={classes.root}>
               <Grid container spacing={1} >
