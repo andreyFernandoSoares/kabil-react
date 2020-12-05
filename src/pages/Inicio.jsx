@@ -46,12 +46,13 @@ export default function Inicio() {
       api.post(`/jogador`, dados)
       .then(({ data }) => {
         localStorage.setItem("ID_PLAYER", data);
-        history.push("/kabil");
+        localStorage.setItem("ROOM_COD", codigo);
+        history.push("/kabil/play");
       })
       .catch((error) => {
           console.log("error");
           console.log(error);
-          enqueueSnackbar("Falha ao iniciar jogo!", {
+          enqueueSnackbar("Código está errado ou a sala está inativa!", {
               variant: "error"
           });
       });

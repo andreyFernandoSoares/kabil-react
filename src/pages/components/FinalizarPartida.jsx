@@ -17,7 +17,6 @@ export default function FinalizarPartida() {
 
     return (
         <Fragment>
-            <BarraDeNavegacao tipo={"jogador"}/>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <div className={classes.paper}>

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -20,6 +20,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import api from '../services/api';
+import { useSnackbar } from 'notistack';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,25 +61,59 @@ const StyledTableRow = withStyles((theme) => ({
 export default function Dre() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [ranking, setRanking] = React.useState([]);
+  const [rows, setRows] = React.useState([]);
+  const { enqueueSnackbar }  = useSnackbar();
 
-  function createData(name, calories) {
-    return { name, calories };
+  const headers = {
+    'Authorization': localStorage.getItem('TOKEN_KEY')
+  }
+
+  useEffect(() => {
+    setInterval(() => {
+      buscaDre();
+    }, 10000);
+  }, []);
+
+  async function buscaDre() {
+    setTimeout(() => {
+      api.get(`/ranking`, { headers: headers })
+      .then(({ data }) => {
+        setRanking(data);
+        montaDre();
+      })
+      .catch((error) => {
+          console.log("error");
+          console.log(error);
+          enqueueSnackbar("Falha ao carregar ranking!", {
+              variant: "error"
+          });
+      });
+    }, 1000);
+  }
+
+  function criarDados(nome, valor) {
+    return { nome, valor };
   }
   
-  const rows = [
-    createData('RECEITA OPERACIONAL BRUTA', 159),
-    createData('Venda de mercadorias', 237),
-    createData('(-) DEDUÇÕES DA RECEITA BRUTA', 262),
-    createData('Devoluções', 305),
-    createData('Impostos e Contribuições', 356),
-    createData('(=) RECEITA OPERACIONAL LÍQUIDA', 356),
-    createData('(-) DESPESAS OPERACIONAIS', 356),
-    createData('Despesas com vendas', 356),
-    createData('Despesas Administrativas', 356),
-    createData('(=) RESULTADO ANTES DO IMPOSTO DE RENDA ', 356),
-    createData('(-) Imposto de Renda', 356),
-    createData('(=) RESULTADO LÍQUIDO DO EXERCÍCIO', 356)
-  ];
+  function montaDre(dre) {
+    setRows(
+      criarDados('RECEITA OPERACIONAL BRUTA', dre.receitaBruta),
+      criarDados('Venda de mercadorias', dre.vendaMercadorias),
+      criarDados('(-) DEDUÇÕES DA RECEITA BRUTA', dre.deducoesReceitaBruta),
+      criarDados('Devoluções', dre.devolucoes),
+      criarDados('Impostos e Contribuições', dre.impostosContribuicoes),
+      criarDados('(=) RECEITA OPERACIONAL LÍQUIDA', dre.receitaOperacionalLiquida),
+      criarDados('(-) DESPESAS OPERACIONAIS', dre.dispensasOperacionais),
+      criarDados('Despesas com vendas', dre.despesasComVendas),
+      criarDados('Despesas Administrativas', dre.despesasAdministrativas),
+      criarDados('(=) RESULTADO ANTES DO IMPOSTO DE RENDA ', dre.resultadoAntesDoImposto),
+      criarDados('(-) Imposto de Renda', dre.impostoRenda),
+      criarDados('(=) RESULTADO LÍQUIDO DO EXERCÍCIO', dre.resultadoLiquidoExercicio)
+    )
+
+    handleClickOpen();
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -92,27 +128,31 @@ export default function Dre() {
         <BarraDeNavegacao tipo={"admin"}/>
 
         {/* Inicio Cards */}
-        <Box 
-            component="div" 
-            display="flex" 
-            className={classes.box}
-        >
-          <Card className={classes.root}>
-              <CardActionArea onClick={handleClickOpen}>
-                  <CardMedia
-                      className={classes.media}
-                  />
-                  <CardContent>
-                      <Typography gutterBottom variant="h6" component="h2">
-                          Nome do Jovem
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary" component="p">
-                          Liquido quentaque
-                      </Typography>
-                  </CardContent>
-              </CardActionArea>
-          </Card>
-        </Box>
+        {ranking.map((rank, index) => {
+          //rank.finalizada > 0 ? (
+            <Box 
+                component="div" 
+                display="flex" 
+                className={classes.box}
+            >
+              <Card className={classes.root}>
+                  <CardActionArea onClick={montaDre(rank.jogador.dre)}>
+                      <CardMedia
+                          className={classes.media}
+                      />
+                      <CardContent>
+                          <Typography gutterBottom variant="h6" component="h2">
+                            { rank.jogador.nome }
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary" component="p">
+                            { rank.resultadoLiquidoExercicio }
+                          </Typography>
+                      </CardContent>
+                  </CardActionArea>
+              </Card>
+            </Box> 
+         // ) : null 
+        })}
         {/* Fim Cards */}
 
 
@@ -135,11 +175,11 @@ export default function Dre() {
                     </TableHead>
                     <TableBody>
                       {rows.map((row) => (
-                        <StyledTableRow key={row.name}>
+                        <StyledTableRow key={row.nome}>
                           <StyledTableCell component="th" scope="row">
-                            {row.name}
+                            {row.nome}
                           </StyledTableCell>
-                          <StyledTableCell align="right">{row.calories}</StyledTableCell>
+                          <StyledTableCell align="right">{row.valor}</StyledTableCell>
                         </StyledTableRow>
                       ))}
                     </TableBody>

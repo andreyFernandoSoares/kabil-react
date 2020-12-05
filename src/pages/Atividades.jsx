@@ -304,7 +304,7 @@ export default function Atividades() {
   const cadastraAtividade = async () => {
     let novaAtividade = { 
       "descricao": descricao, 
-      "passsivo": passivo,
+      "passivo": passivo,
       "ativo": ativo
     }
 

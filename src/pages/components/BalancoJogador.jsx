@@ -1,6 +1,5 @@
 import { Container, Grid, makeStyles, TextField } from '@material-ui/core';
 import React, { Fragment, useEffect } from 'react';
-import BarraDeNavegacao from './BarraDeNavegacao';
 import { useSnackbar } from 'notistack';
 import api from '../../services/api';
 
@@ -30,7 +29,7 @@ export default function BalancoJogador() {
   async function preencheBalanco() {
     
     setTimeout(() => {
-      api.get(`/balanco/${jogadorId}`)
+      api.get(`/jogador/${jogadorId}`)
       .then(({ data }) => {
         setBalanco(data);
       })
@@ -345,8 +344,6 @@ export default function BalancoJogador() {
 
   return (
       <Fragment>
-        <BarraDeNavegacao tipo={"admin"}/>
-
         <Container className={classes.container} maxWidth="ls">
           <form>
             <div className={classes.root}>

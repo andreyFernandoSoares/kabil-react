@@ -24,7 +24,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Menu, SwipeableDrawer } from '@material-ui/core';
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import api from '../../services/api';
 import { useSnackbar } from 'notistack';
 import BalancoJogador from './BalancoJogador';
@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
     }
   }));
 
-export default function BarraDeNavegacao( { tipo } ) {
+export default function BarraDeNavegacao( { tipo, location } ) {
   const classes = useStyles();
   let history = useHistory();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -92,13 +92,19 @@ export default function BarraDeNavegacao( { tipo } ) {
   });
   const { enqueueSnackbar }  = useSnackbar();
   const usuarioId = localStorage.getItem('ID_USER');
+  const param = useParams();
+  let play = "";
 
   const headers = {
     'Authorization': localStorage.getItem('TOKEN_KEY')
   }
   
   useEffect(() => {
-    buscaCodigo();
+    if (param) {
+      play = param.param;
+      if (param.param != 'play')
+        buscaCodigo();
+    }
   }, [codigoSalaAux]);
 
   const handleClickOpen = () => {
@@ -194,7 +200,7 @@ export default function BarraDeNavegacao( { tipo } ) {
 
   const buscaCodigo = async () => {
     setTimeout(() => {
-      api.get(`/sala/${usuarioId}`, { headers: headers })
+      api.get(`/sala/codigo/${usuarioId}`)
       .then(({ data }) => {
         setCodigoSala(data)
       })
@@ -217,8 +223,11 @@ export default function BarraDeNavegacao( { tipo } ) {
       .catch((error) => {
           console.log("error");
           console.log(error);
-          enqueueSnackbar("Você já possui uma sala ativa!", {
+          enqueueSnackbar("Já exite uma sala ativa!", {
               variant: "error"
+          });
+          enqueueSnackbar("Cadastre no minimo 10 atividades!", {
+            variant: "error"
           });
       });
     }, 1000);
@@ -252,14 +261,17 @@ export default function BarraDeNavegacao( { tipo } ) {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      {tipo == 'admin' ? (
-        codigoSala == '' ?
+      
+      {play != 'play' && tipo == 'admin' ? (
+        codigoSala == ''  ?
           (
             <MenuItem onClick={criaSala}>Gerar Sala</MenuItem>
           ) : (
             <MenuItem onClick={handleOpenDialogCodigo}>Visualizar código</MenuItem>
           )
-      ) : <MenuItem onClick={handleOpenDialogBalanco}>Balanço Patrimonial</MenuItem> }
+      ) : 
+        <MenuItem onClick={handleOpenDialogBalanco}>Balanço Patrimonial</MenuItem> 
+      }
       <MenuItem onClick={logout}>Sair</MenuItem>
     </Menu>
   );
@@ -417,6 +429,7 @@ export default function BarraDeNavegacao( { tipo } ) {
             onClose={handleCloseDialogBalanco}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
+            fullScreen={true}
         >
             <DialogTitle id="alert-dialog-title">{"Balanço Patrimonial"}</DialogTitle>
             <DialogContent>

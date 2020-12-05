@@ -7,22 +7,21 @@ import { Step, StepLabel, Stepper } from '@material-ui/core';
 import FinalizarPartida from './components/FinalizarPartida';
 
 export default function Jogador() {
-  const [atividades, setAtividades] = React.useState([]);
   const [formularios, setFormularios] = React.useState([]);
   const [etapaAtual, setEtapaAtual] = React.useState(0);
   const { enqueueSnackbar }  = useSnackbar();
   const jogadorId = parseInt(localStorage.getItem('ID_PLAYER'));
+  const codigo = localStorage.getItem('ROOM_COD');
 
   useEffect(() => {
     buscaAtividades();
-    montaFormularios();
   }, []);
 
   async function buscaAtividades() {
     setTimeout(() => {
-      api.get(`/atividade`)
+      api.get(`/sala/${codigo}`)
       .then(({ data }) => {
-        setAtividades(data);
+        montaFormularios(data);
       })
       .catch((error) => {
           console.log("error");
@@ -34,13 +33,20 @@ export default function Jogador() {
     }, 1000);
   }
 
-  function montaFormularios() {
-    let listaFormularios = [];
-
-    for (let atividade in atividades) 
-      listaFormularios.push(<FormulariosJogo atividade={atividade} gravarJogada={gravarJogada}/>);
-  
-    listaFormularios.push(<FinalizarPartida />);
+  function montaFormularios(data) {
+    let listaFormularios = [
+      <FormulariosJogo atividade={data[0]} gravarJogada={gravarJogada}/>,
+      <FormulariosJogo atividade={data[1]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[2]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[3]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[4]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[5]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[6]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[7]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[8]} gravarJogada={gravarJogada}/>,
+      // <FormulariosJogo atividade={atividades[9]} gravarJogada={gravarJogada}/>,
+      <FinalizarPartida />
+    ];
 
     setFormularios(listaFormularios);
   }
@@ -70,12 +76,17 @@ export default function Jogador() {
         <BarraDeNavegacao tipo={"jogador"}/>
 
         <Stepper activeStep={etapaAtual}>
-          {formularios.map((text, index) => {
-            index != 10 ?
-              <Step><StepLabel>Atividade {index+1}</StepLabel></Step>
-            : 
-              <Step><StepLabel>Finalizar</StepLabel></Step>
-          })}
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Atividade</StepLabel></Step>
+            <Step><StepLabel>Finalizar</StepLabel></Step>
         </Stepper>
         {formularios[etapaAtual]}
       </Fragment>

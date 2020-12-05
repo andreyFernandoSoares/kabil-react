@@ -1,6 +1,5 @@
 import { Button, Container, CssBaseline, makeStyles, TextField, Typography } from '@material-ui/core';
 import React, { Fragment } from 'react';
-import BarraDeNavegacao from './BarraDeNavegacao';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -22,16 +21,16 @@ export default function FormulariosJogo({ atividade, gravarJogada}) {
             "passivo": atividade.passivo,
             "valor": valor
         }
+        setValor(0);
         gravarJogada(dados);
     }
 
     return (
         <Fragment>
-            <BarraDeNavegacao tipo={"jogador"}/>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <div className={classes.paper}>
-                    <Typography variant="h6">
+                    <Typography variant="h6" align="center">
                         {atividade.descricao}
                     </Typography>
                     <form className={classes.form} onSubmit={(event) => {event.preventDefault(); montaDados();}}>
