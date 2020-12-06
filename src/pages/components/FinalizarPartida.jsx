@@ -1,6 +1,8 @@
 import { Button, Container, CssBaseline, makeStyles } from '@material-ui/core';
 import React, { Fragment } from 'react';
-import BarraDeNavegacao from './BarraDeNavegacao';
+import { useSnackbar } from 'notistack';
+import api from '../../services/api';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
     form: {
@@ -14,13 +16,35 @@ const useStyles = makeStyles((theme) => ({
 
 export default function FinalizarPartida() {
     const classes = useStyles();
+    const { enqueueSnackbar }  = useSnackbar();
+    const jogadorId = localStorage.getItem('ID_PLAYER');
+    const codigo = localStorage.getItem('ROOM_COD');
+    const history = useHistory();
+
+    async function gravaDre() {
+        setTimeout(() => {
+            api.post(`jogador/finaliza/${jogadorId}/${codigo}`)
+            .then(({ data }) => {
+                localStorage.removeItem('ID_PLAYER');
+                localStorage.removeItem('ROOM_COD');
+                history.push("/")
+            })
+            .catch((error) => {
+                console.log("error");
+                console.log(error);
+                enqueueSnackbar("Falha ao monstar Dre!", {
+                    variant: "error"
+                });
+            });
+        }, 1000);
+    }
 
     return (
         <Fragment>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
                 <div className={classes.paper}>
-                    <form className={classes.form} >
+                    <form className={classes.form} onSubmit={(event) => {event.preventDefault(); gravaDre();}}>
                         <Button
                             type="submit"
                             fullWidth

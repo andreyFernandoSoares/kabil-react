@@ -1,27 +1,40 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import BarraDeNavegacao from './components/BarraDeNavegacao';
 import { useSnackbar } from 'notistack';
 import api from '../services/api';
-import FormulariosJogo from './components/FormulariosJogo';
-import { Step, StepLabel, Stepper } from '@material-ui/core';
+import { Button, Container, CssBaseline, makeStyles, TextField, Typography } from '@material-ui/core';
 import FinalizarPartida from './components/FinalizarPartida';
 
+
+const useStyles = makeStyles((theme) => ({
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+}));
+
 export default function Jogador() {
-  const [formularios, setFormularios] = React.useState([]);
-  const [etapaAtual, setEtapaAtual] = React.useState(0);
+  const classes = useStyles();
+  const [formularios, setFormularios] = useState([]);
   const { enqueueSnackbar }  = useSnackbar();
   const jogadorId = parseInt(localStorage.getItem('ID_PLAYER'));
   const codigo = localStorage.getItem('ROOM_COD');
-
+  
+  const [valor, setValor] = React.useState(0);
+  
   useEffect(() => {
-    buscaAtividades();
+    buscaDados();
   }, []);
 
-  async function buscaAtividades() {
+  async function buscaDados() {
     setTimeout(() => {
       api.get(`/sala/${codigo}`)
       .then(({ data }) => {
-        montaFormularios(data);
+        setFormularios(data);
+        console.log(formularios)
       })
       .catch((error) => {
           console.log("error");
@@ -30,32 +43,13 @@ export default function Jogador() {
               variant: "error"
           });
       });
-    }, 1000);
-  }
-
-  function montaFormularios(data) {
-    let listaFormularios = [
-      <FormulariosJogo atividade={data[0]} gravarJogada={gravarJogada}/>,
-      <FormulariosJogo atividade={data[1]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[2]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[3]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[4]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[5]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[6]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[7]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[8]} gravarJogada={gravarJogada}/>,
-      // <FormulariosJogo atividade={atividades[9]} gravarJogada={gravarJogada}/>,
-      <FinalizarPartida />
-    ];
-
-    setFormularios(listaFormularios);
+    }, 3000);
   }
 
   async function gravarJogada(dados) {
     setTimeout(() => {
       api.put(`/jogador/${jogadorId}`, dados)
       .then(({ data }) => {
-        proximo();
       })
       .catch((error) => {
           console.log("error");
@@ -67,28 +61,57 @@ export default function Jogador() {
     }, 1000);
   }
 
-  function proximo() {
-    setEtapaAtual(etapaAtual+1);
+  function montaDados(atividade) {
+      let dados = {
+          "ativo": atividade.ativo,
+          "passivo": atividade.passivo,
+          "valor": valor
+      }
+      setValor(0);
+      gravarJogada(dados);
   }
 
-  return (
-      <Fragment>
-        <BarraDeNavegacao tipo={"jogador"}/>
+    return (
+        <Fragment>
+          <BarraDeNavegacao/>
+            <Container component="main" maxWidth="xs">
+                <CssBaseline />
+                { formularios.map((atividade, index) => {
+                  <div className={classes.paper}>
+                      <Typography variant="h6" align="center">
+                          {atividade.descricao}
+                      </Typography>
+                      <form className={classes.form} onSubmit={(event) => {event.preventDefault(); montaDados(atividade);}}>
+                          <TextField
+                              variant="outlined"
+                              margin="normal"
+                              required
+                              fullWidth
+                              id="valor"
+                              label="Valor"
+                              name="valor"
+                              autoComplete="valor"
+                              type="number"
+                              value={valor}
+                              onChange={(event) => {setValor(event.target.value);}}
+                              autoFocus
+                          />
+                          <Button
+                              type="submit"
+                              fullWidth
+                              variant="contained"
+                              color="primary"
+                              className={classes.submit}
+                          >
+                              Enviar
+                          </Button>
+                      </form>
+                  </div>
+                })}
+            </Container>
+            <FinalizarPartida/>
+        </Fragment>
+    );
 
-        <Stepper activeStep={etapaAtual}>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Atividade</StepLabel></Step>
-            <Step><StepLabel>Finalizar</StepLabel></Step>
-        </Stepper>
-        {formularios[etapaAtual]}
-      </Fragment>
-  );
+
 }

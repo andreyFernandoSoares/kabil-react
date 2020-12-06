@@ -92,6 +92,8 @@ export default function BarraDeNavegacao( { tipo, location } ) {
   });
   const { enqueueSnackbar }  = useSnackbar();
   const usuarioId = localStorage.getItem('ID_USER');
+  const jogadorId = localStorage.getItem('ID_PLAYER');
+  const codigo = localStorage.getItem('ROOM_COD');
   const param = useParams();
   let play = "";
 
@@ -146,10 +148,10 @@ export default function BarraDeNavegacao( { tipo, location } ) {
         history.push("/dre");
         break;
       case 'Login':
-        if (tipo == "admin")
+        if (tipo == "admin" && play != 'play')
           history.push('/login');
         else
-          history.push('/inicio');  
+          history.push('/');  
         break;
       default:
         break;
@@ -234,11 +236,30 @@ export default function BarraDeNavegacao( { tipo, location } ) {
     handleMenuClose();
   }
 
-  const logout = () => {
-    localStorage.removeItem('TOKEN_KEY');
-    localStorage.removeItem('ID_USER');
-    handleMenuClose();
-    direcionarParaPagina("Login");
+  const logout = async () => {
+    if (play != 'play') {
+      localStorage.removeItem('TOKEN_KEY');
+      localStorage.removeItem('ID_USER');
+      handleMenuClose();
+      direcionarParaPagina("Login");
+    } else {
+      setTimeout(() => {
+        api.delete(`/jogador/${jogadorId}/${codigo}`)
+        .then(({ data }) => {
+          localStorage.removeItem('ROOM_COD');
+          localStorage.removeItem('ID_PLAYER');
+          handleMenuClose();
+          direcionarParaPagina("Login");
+        })
+        .catch((error) => {
+            console.log("error");
+            console.log(error);
+            enqueueSnackbar("Falha ao sair!", {
+                variant: "error"
+            });
+        });
+      }, 1000);
+    }
   };
 
   const handleMenuClose = () => {

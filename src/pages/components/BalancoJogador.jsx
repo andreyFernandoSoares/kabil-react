@@ -27,7 +27,6 @@ export default function BalancoJogador() {
   }, []);
 
   async function preencheBalanco() {
-    
     setTimeout(() => {
       api.get(`/jogador/${jogadorId}`)
       .then(({ data }) => {

@@ -80,7 +80,6 @@ export default function Dre() {
       api.get(`/ranking`, { headers: headers })
       .then(({ data }) => {
         setRanking(data);
-        montaDre();
       })
       .catch((error) => {
           console.log("error");
@@ -89,7 +88,7 @@ export default function Dre() {
               variant: "error"
           });
       });
-    }, 1000);
+    }, 10000);
   }
 
   function criarDados(nome, valor) {
@@ -129,7 +128,6 @@ export default function Dre() {
 
         {/* Inicio Cards */}
         {ranking.map((rank, index) => {
-          //rank.finalizada > 0 ? (
             <Box 
                 component="div" 
                 display="flex" 
@@ -151,7 +149,6 @@ export default function Dre() {
                   </CardActionArea>
               </Card>
             </Box> 
-         // ) : null 
         })}
         {/* Fim Cards */}
 
@@ -174,14 +171,14 @@ export default function Dre() {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {rows.map((row) => (
+                      {rows.map((row, index) => {
                         <StyledTableRow key={row.nome}>
                           <StyledTableCell component="th" scope="row">
                             {row.nome}
                           </StyledTableCell>
                           <StyledTableCell align="right">{row.valor}</StyledTableCell>
                         </StyledTableRow>
-                      ))}
+                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>
