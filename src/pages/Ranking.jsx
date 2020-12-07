@@ -22,6 +22,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import api from '../services/api';
 import { useSnackbar } from 'notistack';
+import BalancoJogador from './components/BalancoJogador';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,7 +59,7 @@ const StyledTableRow = withStyles((theme) => ({
   },
 }))(TableRow);
 
-export default function Dre() {
+export default function Ranking() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const [ranking, setRanking] = React.useState([]);
@@ -66,18 +67,16 @@ export default function Dre() {
   const { enqueueSnackbar }  = useSnackbar();
 
   const headers = {
-    'Authorization': localStorage.getItem('TOKEN_KEY')
+    'Authorization': localStorage.getItem('TOKEN_KEY'),
+    'Content-Type': 'application/json'
   }
 
   useEffect(() => {
-    setInterval(() => {
       buscaDre();
-    }, 10000);
   }, []);
 
   async function buscaDre() {
-    setTimeout(() => {
-      api.get(`/ranking`, { headers: headers })
+    await api.get(`/ranking`, { headers: headers })
       .then(({ data }) => {
         setRanking(data);
       })
@@ -88,33 +87,10 @@ export default function Dre() {
               variant: "error"
           });
       });
-    }, 10000);
   }
 
-  function criarDados(nome, valor) {
-    return { nome, valor };
-  }
-  
-  function montaDre(dre) {
-    setRows(
-      criarDados('RECEITA OPERACIONAL BRUTA', dre.receitaBruta),
-      criarDados('Venda de mercadorias', dre.vendaMercadorias),
-      criarDados('(-) DEDUÇÕES DA RECEITA BRUTA', dre.deducoesReceitaBruta),
-      criarDados('Devoluções', dre.devolucoes),
-      criarDados('Impostos e Contribuições', dre.impostosContribuicoes),
-      criarDados('(=) RECEITA OPERACIONAL LÍQUIDA', dre.receitaOperacionalLiquida),
-      criarDados('(-) DESPESAS OPERACIONAIS', dre.dispensasOperacionais),
-      criarDados('Despesas com vendas', dre.despesasComVendas),
-      criarDados('Despesas Administrativas', dre.despesasAdministrativas),
-      criarDados('(=) RESULTADO ANTES DO IMPOSTO DE RENDA ', dre.resultadoAntesDoImposto),
-      criarDados('(-) Imposto de Renda', dre.impostoRenda),
-      criarDados('(=) RESULTADO LÍQUIDO DO EXERCÍCIO', dre.resultadoLiquidoExercicio)
-    )
-
-    handleClickOpen();
-  };
-
-  const handleClickOpen = () => {
+  const handleClickOpen = (jogador) => {
+    localStorage.setItem('ID_PLAYER', jogador.id);
     setOpen(true);
   };
 
@@ -134,16 +110,13 @@ export default function Dre() {
                 className={classes.box}
             >
               <Card className={classes.root}>
-                  <CardActionArea onClick={montaDre(rank.jogador.dre)}>
+                  <CardActionArea onClick={handleClickOpen(rank.jogador)}>
                       <CardMedia
                           className={classes.media}
                       />
                       <CardContent>
                           <Typography gutterBottom variant="h6" component="h2">
                             { rank.jogador.nome }
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary" component="p">
-                            { rank.resultadoLiquidoExercicio }
                           </Typography>
                       </CardContent>
                   </CardActionArea>
@@ -155,35 +128,9 @@ export default function Dre() {
 
         {/* Inicio Dialog */}
           <Dialog open={open} onClose={handleClose} fullScreen={true} >
-            <DialogTitle>Nome do jovem</DialogTitle>
+            <DialogTitle>Balanço Patrimonial</DialogTitle>
             <DialogContent>
-                <DialogContentText>
-                  Demonstração do resultado do exercício !
-                </DialogContentText>
-
-                {/* Inicio da tabela */}
-                <TableContainer component={Paper}>
-                  <Table className={classes.table} aria-label="customized table">
-                    <TableHead>
-                      <TableRow>
-                        <StyledTableCell>Campo</StyledTableCell>
-                        <StyledTableCell align="right">Valor</StyledTableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {rows.map((row, index) => {
-                        <StyledTableRow key={row.nome}>
-                          <StyledTableCell component="th" scope="row">
-                            {row.nome}
-                          </StyledTableCell>
-                          <StyledTableCell align="right">{row.valor}</StyledTableCell>
-                        </StyledTableRow>
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                {/* Fim da tabela */}
-                
+                <BalancoJogador />
                 <DialogActions>
                 <Button onClick={handleClose} color="primary">
                     Sair

@@ -145,7 +145,7 @@ export default function BarraDeNavegacao( { tipo, location } ) {
         history.push("/balanco");
         break;
       case 'Ranking':
-        history.push("/dre");
+        history.push("/ranking");
         break;
       case 'Login':
         if (tipo == "admin" && play != 'play')

@@ -47,6 +47,7 @@ export default function Inicio() {
       .then(({ data }) => {
         localStorage.setItem("ID_PLAYER", data);
         localStorage.setItem("ROOM_COD", codigo);
+        localStorage.setItem('STEP', 0);
         history.push("/kabil/play");
       })
       .catch((error) => {

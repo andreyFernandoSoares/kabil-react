@@ -63,7 +63,9 @@ function stableSort(array, comparator) {
 const headCells = [
   { id: 'descricao', numeric: false, disablePadding: true, label: 'Descrição' },
   { id: 'ativo', numeric: false, disablePadding: false, label: 'Ativo' },
-  { id: 'passivo', numeric: false, disablePadding: false, label: 'Passivo' }
+  { id: 'passivo', numeric: false, disablePadding: false, label: 'Passivo' },
+  { id: 'valor', numeric: true, disablePadding: false, label: 'Valor a vista' },
+  { id: 'valorAPrazo', numeric: true, disablePadding: false, label: 'Valor a prazo' },
 ];
 
 function EnhancedTableHead(props) {
@@ -224,6 +226,8 @@ export default function Atividades() {
   const { enqueueSnackbar }  = useSnackbar();
   const [dados, setDados] = React.useState([]);
   const [auxDados, setAuxDados] = React.useState({});
+  const [valor, setValor] = React.useState(0);
+  const [valorAPrazo, setValorAPrazo] = React.useState(0);
 
   const headers = {
     'Content-Type': 'application/json',
@@ -252,6 +256,14 @@ export default function Atividades() {
   
   const handleDescChange = (event) => {
     setDescricao(event.target.value);
+  };
+
+  const handleValorChange = (event) => {
+    setValor(event.target.value);
+  };
+
+  const handleValorPrazoChange = (event) => {
+    setValorAPrazo(event.target.value);
   };
 
   const handlePassivoChange = (event) => {
@@ -305,7 +317,9 @@ export default function Atividades() {
     let novaAtividade = { 
       "descricao": descricao, 
       "passivo": passivo,
-      "ativo": ativo
+      "ativo": ativo,
+      "valor": valor,
+      "valorAPrazo": valorAPrazo
     }
 
     if (descricao !== '' && passivo !==  '' && ativo !==  '') {
@@ -453,6 +467,8 @@ export default function Atividades() {
                                 </TableCell>
                                 <TableCell align="left">{row.ativo}</TableCell>
                                 <TableCell align="left">{row.passivo}</TableCell>
+                                <TableCell align="right">{row.valor}</TableCell>
+                                <TableCell align="right">{row.valorAPrazo}</TableCell>
                                 </TableRow>
                             );
                             })}
@@ -503,14 +519,13 @@ export default function Atividades() {
                     />
 
                     <FormControl className={classes.formControl} fullWidth>
-                        <InputLabel id="demo-controlled-open-select-label">Cadastrar campo Crédito</InputLabel>
+                        <InputLabel id="demo-controlled-open-select-label">Cadastrar campo Ativo</InputLabel>
                         <Select
                             labelId="demo-controlled-open-select-label"
                             id="demo-controlled-open-select"
                             value={ativo}
                             onChange={handleAtivoChange}
                         >
-                            <MenuItem value={"CAIXA"}>Caixa</MenuItem>
                             <MenuItem value={"CONTASRECEBER"}>Contas à receber</MenuItem>
                             <MenuItem value={"ESTOQUE"}>Estoque</MenuItem>
                             <MenuItem value={"EQUIPAMENTOS"}>Equipamentos</MenuItem>
@@ -520,7 +535,7 @@ export default function Atividades() {
                     </FormControl>
 
                     <FormControl className={classes.formControl} fullWidth>
-                        <InputLabel id="demo-controlled-open-select-label">Cadastrar campo Dédito</InputLabel>
+                        <InputLabel id="demo-controlled-open-select-label">Cadastrar campo Passivo</InputLabel>
                         <Select
                             labelId="demo-controlled-open-select-label"
                             id="demo-controlled-open-select"
@@ -528,13 +543,34 @@ export default function Atividades() {
                             onChange={handlePassivoChange}
                         >
                             <MenuItem value={"FORNECEDORES"}>Fornecedores</MenuItem>
-                            <MenuItem value={"SALARIOS"}>Salários</MenuItem>
-                            <MenuItem value={"IMPOSTOS"}>Impostos</MenuItem>
+                            <MenuItem value={"CONTASAPAGAR"}>Contas a pagar</MenuItem>
                             <MenuItem value={"ALUGUEL"}>Aluguel</MenuItem>
                             <MenuItem value={"FINANCIAMENTOS"}>Financiamentos</MenuItem>
                             <MenuItem value={"EMPRESTIMOS"}>Empréstimos</MenuItem>
                         </Select>
                     </FormControl>
+
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="valor"
+                        label="Valor"
+                        type="text"
+                        value={valor}
+                        onChange={handleValorChange}
+                        fullWidth
+                    />
+
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="valorAPrazo"
+                        label="Valor a prazo"
+                        type="text"
+                        value={valorAPrazo}
+                        onChange={handleValorPrazoChange}
+                        fullWidth
+                    />
                 </DialogContent>
                 <DialogActions>
                 <Button onClick={handleClose} color="primary">

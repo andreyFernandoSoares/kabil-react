@@ -25,7 +25,7 @@ export default function BalancoPatrimonial() {
   const [caixa, setCaixa] = React.useState(0);
   const [fornecedores, setFornecedores] = React.useState(0);
   const [contasAReceber, setContasAReceber] = React.useState(0);
-  const [salarios, setSalarios] = React.useState(0);
+  const [contasAPagar, setContasAPagar] = React.useState(0);
   const [estoque, setEstoque] = React.useState(0);
   const [impostos, setImpostos] = React.useState(0);
   const [ativoNaoCirculante, setAtivoNaoCirculante] = React.useState(0);
@@ -71,7 +71,7 @@ export default function BalancoPatrimonial() {
   useEffect(() => {
     setPassivoCirculante(somaPassivoCirculante());
     setPassivo(somaPassivo());
-  }, [fornecedores, salarios, impostos, aluguel]);
+  }, [fornecedores, contasAPagar, impostos, aluguel]);
 
   useEffect(() => {
     setPassivoNaoCirculante(somaPassivoNaoCirculante());
@@ -87,9 +87,8 @@ export default function BalancoPatrimonial() {
       "caixa": caixa,
       "fornecedores": fornecedores,
       "contasAReceber": contasAReceber,
-      "salarios": salarios,
+      "contasAPagar": contasAPagar,
       "estoque": estoque,
-      "impostos": impostos,
       "ativoNaoCirculante": ativoNaoCirculante,
       "aluguel": aluguel,
       "imobilizados": imobilizados,
@@ -103,6 +102,20 @@ export default function BalancoPatrimonial() {
       "capitalSocial": capitalSocial,
       "id": balanco.id
     }
+  }
+
+  function validaQuantidadePreenchidos() {
+     if (ativo > capitalSocial) {
+       enqueueSnackbar("Quantidade não pode ser maior que o Capital social !", {
+          variant: "error"
+        });
+        setCaixa(0);
+        setContasAReceber(0);
+        setEstoque(0);
+        setEquipamentos(0);
+        setMoveisUtensilios(0);
+        setVeiculo(0);
+     } 
   }
 
   function iniciaValores() {
@@ -132,8 +145,8 @@ export default function BalancoPatrimonial() {
       if (balanco.contasAReceber != null) 
         setContasAReceber(balanco.contasAReceber);
 
-      if (balanco.salarios != null) 
-        setSalarios(balanco.salarios);
+      if (balanco.contasAPagar != null) 
+        setContasAPagar(balanco.contasAPagar);
   
       if (balanco.estoque != null) 
         setEstoque(balanco.estoque);
@@ -177,23 +190,30 @@ export default function BalancoPatrimonial() {
   }
 
   async function gravaBalanco() {
-    let dados = montaDados();
-    setTimeout(() => {
-      api.put(`/balanco`, dados, { headers: headers })
-      .then(({ data }) => {
-        enqueueSnackbar("Balanço patrimonial alterado com sucesso!", {
-          variant: "success"
-        });
-        setAuxBalanco({sucess: true})
-      })
-      .catch((error) => {
-          console.log("error");
-          console.log(error);
-          enqueueSnackbar("Falha ao alterar Balanço patrimonial !", {
-              variant: "error"
+
+    if (ativo == capitalSocial) {
+      let dados = montaDados();
+      setTimeout(() => {
+        api.put(`/balanco`, dados, { headers: headers })
+        .then(({ data }) => {
+          enqueueSnackbar("Balanço patrimonial alterado com sucesso!", {
+            variant: "success"
           });
+          setAuxBalanco({sucess: true})
+        })
+        .catch((error) => {
+            console.log("error");
+            console.log(error);
+            enqueueSnackbar("Falha ao alterar Balanço patrimonial !", {
+                variant: "error"
+            });
+        });
+      }, 1000);
+    } else {
+      enqueueSnackbar("Seu capital social é diferente dos valores no balanço !", {
+        variant: "error"
       });
-    }, 1000);
+    }
   }
 
   async function preencheBalanco() {
@@ -222,7 +242,7 @@ export default function BalancoPatrimonial() {
   }
 
   function somaPassivoCirculante() {
-    return parseFloat(fornecedores) + parseFloat(salarios) + parseFloat(impostos) + parseFloat(aluguel);
+    return parseFloat(fornecedores) + parseFloat(contasAPagar) + parseFloat(impostos) + parseFloat(aluguel);
   }
 
   function somaAtivoCirculante() {
@@ -299,7 +319,7 @@ export default function BalancoPatrimonial() {
             className={classes.textField}
             type="number"
             value={caixa}
-            onChange={(event) => {setCaixa(event.target.value);}}
+            onChange={(event) => {setCaixa(event.target.value); validaQuantidadePreenchidos();}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -308,8 +328,8 @@ export default function BalancoPatrimonial() {
             id="fornecedores"
             className={classes.textField}
             type="number"
+            disabled={true}
             value={fornecedores}
-            onChange={(event) => {setFornecedores(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -327,18 +347,18 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             value={contasAReceber}
-            onChange={(event) => {setContasAReceber(event.target.value);}}
+            onChange={(event) => {setContasAReceber(event.target.value); validaQuantidadePreenchidos();}}
           />
         </Grid>
         <Grid item xs={4}>
-          2.1.2 Salários
+          2.1.2 Contas a pagar
           <TextField
             className={classes.textField}
             size="small"
             type="number"
-            id="salarios"
-            value={salarios}
-            onChange={(event) => {setSalarios(event.target.value);}}
+            id="constasAPgar"
+            disabled={true}
+            value={contasAPagar}
           />
         </Grid>
       </React.Fragment>
@@ -356,18 +376,19 @@ export default function BalancoPatrimonial() {
             type="number"
             id="estoque"
             value={estoque}
-            onChange={(event) => {setEstoque(event.target.value);}}
+            onChange={(event) => {setEstoque(event.target.value); validaQuantidadePreenchidos();}}
           />
         </Grid>
         <Grid item xs={4}>
-          2.1.3 Impostos
+          2.1.3 Aluguel
           <TextField
             className={classes.textField}
             size="small"
             type="number"
-            id="impostos"
-            value={impostos}
-            onChange={(event) => {setImpostos(event.target.value);}}
+            id="aluguel"
+            value={aluguel}
+            disabled={true}
+            onChange={(event) => {setAluguel(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -388,14 +409,13 @@ export default function BalancoPatrimonial() {
           />
         </Grid>
         <Grid item xs={4}>
-          2.1.4 Aluguel
+          <strong>2.2 Passivo Não Circulante</strong>
           <TextField
             className={classes.textField}
             size="small"
-            type="number"
-            id="aluguel"
-            value={aluguel}
-            onChange={(event) => {setAluguel(event.target.value);}}
+            disabled={true}
+            id="passivoNaoCirculante"
+            value={passivoNaoCirculante}
           />
         </Grid>
       </React.Fragment>
@@ -416,13 +436,15 @@ export default function BalancoPatrimonial() {
           />
         </Grid>
         <Grid item xs={4}>
-          <strong>2.2 Passivo Não Circulante</strong>
+          2.2.1 Financiamentos
           <TextField
             className={classes.textField}
             size="small"
+            type="number"
+            id="financiamentos"
             disabled={true}
-            id="passivoNaoCirculante"
-            value={passivoNaoCirculante}
+            value={financiamentos}
+            onChange={(event) => {setFinanciamentos(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -440,18 +462,19 @@ export default function BalancoPatrimonial() {
             type="number"
             id="equipamentos"
             value={equipamentos}
-            onChange={(event) => {setEquipamentos(event.target.value);}}
+            onChange={(event) => {setEquipamentos(event.target.value); validaQuantidadePreenchidos();}}
           />
         </Grid>
         <Grid item xs={4}>
-          2.2.1 Financiamentos
+          2.2.2 Empréstimos
           <TextField
             className={classes.textField}
             size="small"
             type="number"
-            id="financiamentos"
-            value={financiamentos}
-            onChange={(event) => {setFinanciamentos(event.target.value);}}
+            disabled={true}
+            id="emprestimos"
+            value={emprestimos}
+            onChange={(event) => {setEmprestimos(event.target.value);}}
           />
         </Grid>
       </React.Fragment>
@@ -469,18 +492,17 @@ export default function BalancoPatrimonial() {
             type="number"
             value={moveisUtensilios}
             id="moveisUtensilios"
-            onChange={(event) => {setMoveisUtensilios(event.target.value);}}
+            onChange={(event) => {setMoveisUtensilios(event.target.value); validaQuantidadePreenchidos();}}
           />
         </Grid>
         <Grid item xs={4}>
-          2.2.2 Empréstimos
+          <strong>3.0 Patrimônio Liquido</strong>
           <TextField
             className={classes.textField}
             size="small"
-            type="number"
-            id="emprestimos"
-            value={emprestimos}
-            onChange={(event) => {setEmprestimos(event.target.value);}}
+            id="patrimonioLiquido"
+            disabled={true}
+            value={patrimonioLiquido}
           />
         </Grid>
       </React.Fragment>
@@ -498,36 +520,8 @@ export default function BalancoPatrimonial() {
             type="number"
             id="veiculo"
             value={veiculo}
-            onChange={(event) => {setVeiculo(event.target.value);}}
+            onChange={(event) => {setVeiculo(event.target.value); validaQuantidadePreenchidos();}}
           />
-        </Grid>
-        <Grid item xs={4}>
-          <strong>3.0 Patrimônio Liquido</strong>
-          <TextField
-            className={classes.textField}
-            size="small"
-            id="patrimonioLiquido"
-            disabled={true}
-            value={patrimonioLiquido}
-          />
-        </Grid>
-      </React.Fragment>
-    );
-  }
-
-  function CapitalSocial() {
-    return (
-      <React.Fragment>
-        <Grid item xs={4}>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            type="submit"
-            id="gravar"
-            onClick={(event) => {event.preventDefault(); gravaBalanco();}}
-            fullWidth>
-            Gravar
-          </Button>
         </Grid>
         <Grid item xs={4}>
             3.1 Capital social
@@ -537,8 +531,26 @@ export default function BalancoPatrimonial() {
             type="number"
             id="capitalSocial"
             value={capitalSocial}
-            onChange={(event) => {setCapitalSocial(event.target.value); setPatrimonioLiquido(event.target.value);}}
+            onChange={(event) => {setCapitalSocial(event.target.value); setPatrimonioLiquido(event.target.value); validaQuantidadePreenchidos();}}
           />
+        </Grid>
+      </React.Fragment>
+    );
+  }
+
+  function CapitalSocial() {
+    return (
+      <React.Fragment>
+        <Grid item xs={8}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            type="submit"
+            id="gravar"
+            onClick={(event) => {event.preventDefault(); gravaBalanco();}}
+            fullWidth>
+            Gravar
+          </Button>
         </Grid>
       </React.Fragment>
     );

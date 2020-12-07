@@ -143,7 +143,7 @@ export default function BalancoJogador() {
             type="number"
             id="salarios"
             disabled={true}
-            value={balanco.salarios}
+            value={balanco.contasAPagar}
           />
         </Grid>
       </React.Fragment>
@@ -165,14 +165,14 @@ export default function BalancoJogador() {
           />
         </Grid>
         <Grid item xs={4}>
-          2.1.3 Impostos
+          2.1.3 Aluguel
           <TextField
             className={classes.textField}
             size="small"
             type="number"
-            id="impostos"
+            id="aluguel"
             disabled={true}
-            value={balanco.impostos}
+            value={balanco.aluguel}
           />
         </Grid>
       </React.Fragment>
@@ -193,14 +193,13 @@ export default function BalancoJogador() {
           />
         </Grid>
         <Grid item xs={4}>
-          2.1.4 Aluguel
+          <strong>2.2 Passivo Não Circulante</strong>
           <TextField
             className={classes.textField}
             size="small"
-            type="number"
-            id="aluguel"
             disabled={true}
-            value={balanco.aluguel}
+            id="passivoNaoCirculante"
+            value={balanco.passivoNaoCirculante}
           />
         </Grid>
       </React.Fragment>
@@ -221,13 +220,14 @@ export default function BalancoJogador() {
           />
         </Grid>
         <Grid item xs={4}>
-          <strong>2.2 Passivo Não Circulante</strong>
+          2.2.1 Financiamentos
           <TextField
             className={classes.textField}
             size="small"
+            type="number"
+            id="financiamentos"
             disabled={true}
-            id="passivoNaoCirculante"
-            value={balanco.passivoNaoCirculante}
+            value={balanco.financiamentos}
           />
         </Grid>
       </React.Fragment>
@@ -249,14 +249,14 @@ export default function BalancoJogador() {
           />
         </Grid>
         <Grid item xs={4}>
-          2.2.1 Financiamentos
+          2.2.2 Empréstimos
           <TextField
             className={classes.textField}
             size="small"
             type="number"
-            id="financiamentos"
+            id="emprestimos"
+            value={balanco.emprestimos}
             disabled={true}
-            value={balanco.financiamentos}
           />
         </Grid>
       </React.Fragment>
@@ -278,13 +278,13 @@ export default function BalancoJogador() {
           />
         </Grid>
         <Grid item xs={4}>
-          2.2.2 Empréstimos
+          <strong>3.0 Patrimônio Liquido</strong>
           <TextField
             className={classes.textField}
             size="small"
-            type="number"
-            id="emprestimos"
-            value={balanco.emprestimos}
+            id="patrimonioLiquido"
+            disabled={true}
+            value={balanco.patrimonioLiquido}
             disabled={true}
           />
         </Grid>
@@ -305,26 +305,6 @@ export default function BalancoJogador() {
             value={balanco.veiculo}
             disabled={true}
           />
-        </Grid>
-        <Grid item xs={4}>
-          <strong>3.0 Patrimônio Liquido</strong>
-          <TextField
-            className={classes.textField}
-            size="small"
-            id="patrimonioLiquido"
-            disabled={true}
-            value={balanco.patrimonioLiquido}
-            disabled={true}
-          />
-        </Grid>
-      </React.Fragment>
-    );
-  }
-
-  function CapitalSocial() {
-    return (
-      <React.Fragment>
-        <Grid item xs={4}>
         </Grid>
         <Grid item xs={4}>
             3.1 Capital social
@@ -376,9 +356,6 @@ export default function BalancoJogador() {
                 </Grid>
                 <Grid container item xs={12} spacing={3} justify="center">
                   <VeiculosAndPatrimonio />
-                </Grid>
-                <Grid container item xs={12} spacing={3} justify="center">
-                  <CapitalSocial />
                 </Grid>
               </Grid>
             </div>

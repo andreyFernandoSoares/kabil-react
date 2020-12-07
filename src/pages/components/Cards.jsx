@@ -38,7 +38,7 @@ export default function Cards() {
             history.push("/balanco");
             break;
         case 'Dre':
-            history.push("/dre");
+            history.push("/ranking");
             break;
     }
   }

@@ -7,7 +7,7 @@ import Inicio from './pages/Inicio';
 import Admin from './pages/Admin';
 import Jogador from './pages/Jogador';
 import Atividades from './pages/Atividades';
-import Dre from './pages/Dre';
+import Ranking from './pages/Ranking';
 import BalancoPatrimonial from './pages/BalancoPatrimonial';
 
 const Routes = () => (
@@ -20,7 +20,7 @@ const Routes = () => (
             <Route exact path="/kabil/:param" component={Jogador}/>
             <Route exact path="/atividades" component={Atividades}/>
             <Route exact path="/balanco" component={BalancoPatrimonial}/>
-            <Route exact path="/dre" component={Dre}/>
+            <Route exact path="/ranking" component={Ranking}/>
         </Switch>
     </BrowserRouter>
 );
