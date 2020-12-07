@@ -27,7 +27,6 @@ export default function BalancoPatrimonial() {
   const [contasAReceber, setContasAReceber] = React.useState(0);
   const [contasAPagar, setContasAPagar] = React.useState(0);
   const [estoque, setEstoque] = React.useState(0);
-  const [impostos, setImpostos] = React.useState(0);
   const [ativoNaoCirculante, setAtivoNaoCirculante] = React.useState(0);
   const [aluguel, setAluguel] = React.useState(0);
   const [imobilizados, setImobilizados] = React.useState(0);
@@ -42,6 +41,13 @@ export default function BalancoPatrimonial() {
   const [auxBalanco, setAuxBalanco] = React.useState({});
   const [balanco, setBalanco] = React.useState({});
   const { enqueueSnackbar }  = useSnackbar();
+  const [focusCaixa, setFocusCaixa] = React.useState(false);
+  const [focusContasAReceber, setFocusContasAReceber] = React.useState(false);
+  const [focusEstoque, setFocusEstoque] = React.useState(false);
+  const [focusEquipamentos, setFocusEquipamentos] = React.useState(false);
+  const [focusMoveisEUtensilios, setFocusMoveisEUtensilios] = React.useState(false);
+  const [focusVeiculo, setFocusVeiculo] = React.useState(false);
+  const [focusCapitalSocial, setFocusCapitalSocial] = React.useState(false);
 
   const usuarioId = parseInt(localStorage.getItem('ID_USER'));
   const headers = {
@@ -71,12 +77,47 @@ export default function BalancoPatrimonial() {
   useEffect(() => {
     setPassivoCirculante(somaPassivoCirculante());
     setPassivo(somaPassivo());
-  }, [fornecedores, contasAPagar, impostos, aluguel]);
+  }, [fornecedores, contasAPagar, aluguel]);
 
   useEffect(() => {
     setPassivoNaoCirculante(somaPassivoNaoCirculante());
     setPassivo(somaPassivo());
   }, [financiamentos, emprestimos]);
+
+  function focus(campo) {
+
+    setFocusCaixa(false);
+    setFocusContasAReceber(false);
+    setFocusEstoque(false);
+    setFocusEquipamentos(false);
+    setFocusMoveisEUtensilios(false);
+    setFocusVeiculo(false);
+    setFocusCapitalSocial(false);
+
+    switch(campo) {
+      case "CAIXA":
+        setFocusCaixa(true);
+        break;
+      case "CONTASARECEBER":
+        setFocusContasAReceber(true);
+        break;
+      case "ESTOQUE":
+        setFocusEstoque(true);
+        break;
+      case "EQUIPAMENTOS":
+        setFocusEquipamentos(true);
+        break;
+      case "MOVEISEUTENSILIOS":
+        setFocusMoveisEUtensilios(true);
+        break;
+      case "VEICULO":
+        setFocusVeiculo(true);
+        break;
+      case "CAPITAL":
+        setFocusCapitalSocial(true);
+        break;
+    }
+  }
 
   function montaDados() {
     return {
@@ -150,9 +191,6 @@ export default function BalancoPatrimonial() {
   
       if (balanco.estoque != null) 
         setEstoque(balanco.estoque);
-
-      if (balanco.impostos != null) 
-        setImpostos(balanco.impostos);
 
       if (balanco.ativoNaoCirculante != null) 
         setAtivoNaoCirculante(balanco.ativoNaoCirculante);
@@ -242,7 +280,7 @@ export default function BalancoPatrimonial() {
   }
 
   function somaPassivoCirculante() {
-    return parseFloat(fornecedores) + parseFloat(contasAPagar) + parseFloat(impostos) + parseFloat(aluguel);
+    return parseFloat(fornecedores) + parseFloat(contasAPagar) + parseFloat(aluguel);
   }
 
   function somaAtivoCirculante() {
@@ -315,11 +353,12 @@ export default function BalancoPatrimonial() {
         <Grid item xs={4}>
           1.1.1 Caixa
           <TextField
+            autoFocus={focusCaixa}
             id="caixa"
             className={classes.textField}
             type="number"
             value={caixa}
-            onChange={(event) => {setCaixa(event.target.value); validaQuantidadePreenchidos();}}
+            onChange={(event) => {setCaixa(event.target.value); validaQuantidadePreenchidos(); focus("CAIXA");}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -342,12 +381,13 @@ export default function BalancoPatrimonial() {
         <Grid item xs={4}>
           1.1.2 Contas à receber
           <TextField
+            autoFocus={focusContasAReceber}
             className={classes.textField}
             id="contasAReceber"
             size="small"
             type="number"
             value={contasAReceber}
-            onChange={(event) => {setContasAReceber(event.target.value); validaQuantidadePreenchidos();}}
+            onChange={(event) => {setContasAReceber(event.target.value); validaQuantidadePreenchidos(); focus("CONTASARECEBER");}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -371,12 +411,13 @@ export default function BalancoPatrimonial() {
         <Grid item xs={4}>
           1.1.3 Estoque
           <TextField
+            autoFocus={focusEstoque}
             className={classes.textField}
             size="small"
             type="number"
             id="estoque"
             value={estoque}
-            onChange={(event) => {setEstoque(event.target.value); validaQuantidadePreenchidos();}}
+            onChange={(event) => {setEstoque(event.target.value); validaQuantidadePreenchidos(); focus("ESTOQUE");}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -461,8 +502,9 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="equipamentos"
+            autoFocus={focusEquipamentos}
             value={equipamentos}
-            onChange={(event) => {setEquipamentos(event.target.value); validaQuantidadePreenchidos();}}
+            onChange={(event) => {setEquipamentos(event.target.value); validaQuantidadePreenchidos(); focus("EQUIPAMENTOS");}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -491,8 +533,9 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             value={moveisUtensilios}
+            autoFocus={focusMoveisEUtensilios}
             id="moveisUtensilios"
-            onChange={(event) => {setMoveisUtensilios(event.target.value); validaQuantidadePreenchidos();}}
+            onChange={(event) => {setMoveisUtensilios(event.target.value); validaQuantidadePreenchidos(); focus("MOVEISEUTENSILIOS");}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -520,7 +563,7 @@ export default function BalancoPatrimonial() {
             type="number"
             id="veiculo"
             value={veiculo}
-            onChange={(event) => {setVeiculo(event.target.value); validaQuantidadePreenchidos();}}
+            onChange={(event) => {setVeiculo(event.target.value); validaQuantidadePreenchidos(); focus("VEICULO");}}
           />
         </Grid>
         <Grid item xs={4}>
@@ -530,8 +573,9 @@ export default function BalancoPatrimonial() {
             size="small"
             type="number"
             id="capitalSocial"
+            autoFocus={focusCapitalSocial}
             value={capitalSocial}
-            onChange={(event) => {setCapitalSocial(event.target.value); setPatrimonioLiquido(event.target.value); validaQuantidadePreenchidos();}}
+            onChange={(event) => {setCapitalSocial(event.target.value); setPatrimonioLiquido(event.target.value); validaQuantidadePreenchidos(); focus("CAPITAL");}}
           />
         </Grid>
       </React.Fragment>

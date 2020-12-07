@@ -136,7 +136,7 @@ export default function BalancoJogador() {
           />
         </Grid>
         <Grid item xs={4}>
-          2.1.2 Salários
+          2.1.2 Contas a pagar
           <TextField
             className={classes.textField}
             size="small"

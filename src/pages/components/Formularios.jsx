@@ -45,12 +45,28 @@ export default function Formularios( {atividade, gravarJogada} ) {
 
     function montaDados() {
         if (valor >= atividade.valor) {
+            let ponto = 1;
+
+            if (valor != atividade.valor) 
+                ponto = 0;
+
+            if (ativo != atividade.ativo) 
+                ponto = 0;
+            
+            if (passivo != atividade.passivo) 
+                ponto = 0;
+
+            if (valorAPrazo != atividade.valorAPrazo) 
+                ponto = 0;
+            
             let dados = {
                 "ativo": ativo,
                 "passivo": passivo,
                 "valor": valor,
-                "valorAPrazo": valorAPrazo
+                "valorAPrazo": valorAPrazo,
+                "pontos": ponto
             }
+
             setValor(0);
             setValorAPrazo(0);
             gravarJogada(dados);
