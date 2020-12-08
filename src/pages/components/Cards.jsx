@@ -106,10 +106,10 @@ export default function Cards() {
                     </CardMedia>
                     <CardContent>
                         <Typography gutterBottom variant="h5" component="h2">
-                            Ranking de DRE's
+                            Ranking
                         </Typography>
                         <Typography variant="body2" color="textSecondary" component="p">
-                            Ranking dos melhores DRE's nas partidas ministradas!
+                            Ranking dos melhores jogadores nas partidas ministradas!
                         </Typography>
                     </CardContent>
                 </CardActionArea>

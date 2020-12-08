@@ -217,8 +217,9 @@ export default function BarraDeNavegacao( { tipo, location } ) {
     setTimeout(() => {
       api.post(`/sala/${usuarioId}`, {}, { headers: headers })
       .then(({ data }) => {
+        console.log(data);
         setCodigoSalaAux(data);
-        enqueueSnackbar("Sua sala está ativa! Seu codigo é "+data, {
+        enqueueSnackbar("Sua sala está ativa! Seu codigo é "+data.toString(), {
             variant: "success"
         });
       })
@@ -431,7 +432,7 @@ export default function BarraDeNavegacao( { tipo, location } ) {
             <DialogTitle id="alert-dialog-title">{"Aqui está o seu código!"}</DialogTitle>
             <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              {"Use este código para distribuir aos jogadores e se divirta, seu código é: "+codigoSala}
+              {"Use este código para distribuir aos jogadores e se divirta, seu código é: "+codigoSala.toString()}
                 
             </DialogContentText>
             </DialogContent>

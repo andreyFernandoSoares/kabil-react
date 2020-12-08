@@ -311,6 +311,8 @@ export default function Atividades() {
     setAtivo('');
     setDescricao('');
     setPassivo('');
+    setValor(0);
+    setValorAPrazo(0);
   }
 
   const cadastraAtividade = async () => {
@@ -412,8 +414,6 @@ export default function Atividades() {
     <Fragment>
         <BarraDeNavegacao tipo={"admin"} />
         
-
-
         {/* Inicio tabela */}
         <Container component="main" maxWidth="ls">
             <div className={classes.root}>
@@ -445,7 +445,7 @@ export default function Atividades() {
                             .map((row, index) => {
                             const isItemSelected = isSelected(row.id);
                             const labelId = `enhanced-table-checkbox-${index}`;
-
+                            console.log(dados);
                             return (
                                 <TableRow
                                 hover
@@ -554,7 +554,7 @@ export default function Atividades() {
                         autoFocus
                         margin="dense"
                         id="valor"
-                        label="Valor"
+                        label="Valor a vista"
                         type="text"
                         value={valor}
                         onChange={handleValorChange}

@@ -1,96 +1,230 @@
 import React, { Fragment, useEffect } from 'react';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
-import Typography from '@material-ui/core/Typography';
-import { Box } from '@material-ui/core';
-import BarraDeNavegacao from './components/BarraDeNavegacao';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
+import { lighten, makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import Checkbox from '@material-ui/core/Checkbox';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import BarraDeNavegacao from './components/BarraDeNavegacao';
+import { Avatar, Container } from '@material-ui/core';
 import api from '../services/api';
 import { useSnackbar } from 'notistack';
 import BalancoJogador from './components/BalancoJogador';
+import primeiro from '../images/primeiro.png';
+import segundo from '../images/segundo.png';
+import terceiro from '../images/terceiro.png';
+import resto from '../images/resto.png';
 
-const useStyles = makeStyles((theme) => ({
+function descendingComparator(a, b, orderBy) {
+  if (b[orderBy] < a[orderBy]) {
+    return -1;
+  }
+  if (b[orderBy] > a[orderBy]) {
+    return 1;
+  }
+  return 0;
+}
+
+function getComparator(order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function stableSort(array, comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
+}
+
+const headCells = [
+  { id: 'classificacao', numeric: false, disablePadding: false, label: 'Classificação' },
+  { id: 'nome', numeric: false, disablePadding: true, label: 'Nome' },
+  { id: 'pontos', numeric: true, disablePadding: false, label: 'Pontos' }
+];
+
+function EnhancedTableHead(props) {
+  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+  return (
+    <TableHead>
+      <TableRow>
+        <TableCell padding="checkbox">
+          <Checkbox
+            indeterminate={numSelected > 0 && numSelected < rowCount}
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{ 'aria-label': 'select all desserts' }}
+          />
+        </TableCell>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? 'right' : 'left'}
+            padding={headCell.disablePadding ? 'none' : 'default'}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <span className={classes.visuallyHidden}>
+                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                </span>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
+}
+
+EnhancedTableHead.propTypes = {
+  classes: PropTypes.object.isRequired,
+  numSelected: PropTypes.number.isRequired,
+  onRequestSort: PropTypes.func.isRequired,
+  onSelectAllClick: PropTypes.func.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+  rowCount: PropTypes.number.isRequired
+};
+
+const useToolbarStyles = makeStyles((theme) => ({
   root: {
-    width: 200,
-    padding: theme.spacing(3),
-    margin: theme.spacing(2)
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(1),
+    marginTop: theme.spacing(4)
   },
-  media: {
-    height: 80,
-  },
-  box: {
-      padding: theme.spacing(3)
-  },
-  table: {
-    minWidth: 700,
+  highlight:
+    theme.palette.type === 'light'
+      ? {
+          color: theme.palette.secondary.main,
+          backgroundColor: lighten(theme.palette.secondary.light, 0.85),
+        }
+      : {
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.secondary.dark,
+        },
+  title: {
+    flex: '1 1 100%',
   },
 }));
 
-const StyledTableCell = withStyles((theme) => ({
-  head: {
-    backgroundColor: theme.palette.primary.dark,
-    color: theme.palette.common.white,
-  },
-  body: {
-    fontSize: 14,
-  },
-}))(TableCell);
+const EnhancedTableToolbar = (props) => {
+  const classes = useToolbarStyles();
+  const { numSelected } = props;
 
-const StyledTableRow = withStyles((theme) => ({
+  return (
+    <Toolbar
+      className={clsx(classes.root, {
+        [classes.highlight]: numSelected > 0,
+      })}
+    >
+     
+      <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
+        Ranking
+      </Typography>
+    </Toolbar>
+  );
+};
+
+EnhancedTableToolbar.propTypes = {
+  numSelected: PropTypes.number.isRequired,
+};
+
+const useStyles = makeStyles((theme) => ({
   root: {
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.action.hover,
-    },
+    width: '100%',
   },
-}))(TableRow);
+  paper: {
+    width: '100%',
+    marginBottom: theme.spacing(2),
+  },
+  table: {
+    minWidth: 750,
+  },
+  visuallyHidden: {
+    border: 0,
+    clip: 'rect(0 0 0 0)',
+    height: 1,
+    margin: -1,
+    overflow: 'hidden',
+    padding: 0,
+    position: 'absolute',
+    top: 20,
+    width: 1,
+  },
+  formControl: {
+    marginTop: theme.spacing(2),
+    minWidth: 120
+  }
+}));
 
-export default function Ranking() {
+export default function Atividades() {
   const classes = useStyles();
+  const [order, setOrder] = React.useState('asc');
+  const [orderBy, setOrderBy] = React.useState('calories');
+  const [selected, setSelected] = React.useState([]);
+  const [page, setPage] = React.useState(0);
+  const [dense, setDense] = React.useState(false);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [open, setOpen] = React.useState(false);
-  const [ranking, setRanking] = React.useState([]);
-  const [rows, setRows] = React.useState([]);
   const { enqueueSnackbar }  = useSnackbar();
+  const [dados, setDados] = React.useState([]);
+  const [auxDados, setAuxDados] = React.useState({});
 
   const headers = {
-    'Authorization': localStorage.getItem('TOKEN_KEY'),
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Authorization': localStorage.getItem('TOKEN_KEY')
   }
 
   useEffect(() => {
-      buscaDre();
-  }, []);
+    buscaRanking();
+  }, [auxDados]);
 
-  async function buscaDre() {
-    await api.get(`/ranking`, { headers: headers })
+  async function buscaRanking() {
+    setTimeout(() => {
+      api.get(`/ranking`, { headers: headers })
       .then(({ data }) => {
-        setRanking(data);
+        setDados(data);
       })
       .catch((error) => {
           console.log("error");
           console.log(error);
-          enqueueSnackbar("Falha ao carregar ranking!", {
+          enqueueSnackbar("Falha ao carregar dados!", {
               variant: "error"
           });
       });
+    }, 1000);
   }
-
-  const handleClickOpen = (jogador) => {
-    localStorage.setItem('ID_PLAYER', jogador.id);
+  
+  const handleClickOpen = (id) => {
+    localStorage.setItem('ID_PLAYER', id);
     setOpen(true);
   };
 
@@ -98,47 +232,165 @@ export default function Ranking() {
     setOpen(false);
   };
 
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelecteds = dados.map((n) => n.id);
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  };
+
+  const handleClick = (event, id) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleChangeDense = (event) => {
+    setDense(event.target.checked);
+  };
+
+  const isSelected = (id) => selected.indexOf(id) !== -1;
+
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, dados.length - page * rowsPerPage);
+
   return (
-      <Fragment>
-        <BarraDeNavegacao tipo={"admin"}/>
-
-        {/* Inicio Cards */}
-        {ranking.map((rank, index) => {
-            <Box 
-                component="div" 
-                display="flex" 
-                className={classes.box}
-            >
-              <Card className={classes.root}>
-                  <CardActionArea onClick={handleClickOpen(rank.jogador)}>
-                      <CardMedia
-                          className={classes.media}
-                      />
-                      <CardContent>
-                          <Typography gutterBottom variant="h6" component="h2">
-                            { rank.jogador.nome }
-                          </Typography>
-                      </CardContent>
-                  </CardActionArea>
-              </Card>
-            </Box> 
-        })}
-        {/* Fim Cards */}
-
+    <Fragment>
+        <BarraDeNavegacao tipo={"admin"} />
+        
+        {/* Inicio tabela */}
+        <Container component="main" maxWidth="ls">
+            <div className={classes.root}>
+                <Paper className={classes.paper}>
+                    <EnhancedTableToolbar 
+                        numSelected={selected.length} 
+                    />
+                    <TableContainer>
+                    <Table
+                        className={classes.table}
+                        aria-labelledby="tableTitle"
+                        size={dense ? 'small' : 'medium'}
+                        aria-label="enhanced table"
+                    >
+                        <EnhancedTableHead
+                          classes={classes}
+                          numSelected={selected.length}
+                          order={order}
+                          orderBy={orderBy}
+                          onSelectAllClick={handleSelectAllClick}
+                          onRequestSort={handleRequestSort}
+                          rowCount={dados.length}
+                        />
+                        <TableBody>
+                        {stableSort(dados, getComparator(order, orderBy))
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((row, index) => {
+                            const isItemSelected = isSelected(row.id);
+                            const labelId = `enhanced-table-checkbox-${index}`;
+                            console.log(dados);
+                            return (
+                                <TableRow
+                                hover
+                                onClick={(event) => handleClickOpen(row.jogador.id)}
+                                role="checkbox"
+                                aria-checked={isItemSelected}
+                                tabIndex={-1}
+                                key={row.jogador.id}
+                                selected={isItemSelected}
+                                >
+                                <TableCell padding="checkbox">
+                                    <Checkbox
+                                    checked={isItemSelected}
+                                    inputProps={{ 'aria-labelledby': labelId }}
+                                    />
+                                </TableCell>
+                                <TableCell component="th" id={labelId} scope="row" padding="none">
+                                  { index == 0 ? (
+                                    <Avatar alt="Primeiro" variant="square" src= {primeiro} />
+                                  ) : index == 1 ? (
+                                    <Avatar alt="Segundo" variant="square" src= {segundo} />
+                                  ) : index == 2 ? (
+                                    <Avatar alt="Terceiro" variant="square" src= {terceiro} />
+                                  ) : (
+                                    <Avatar alt="Resto" variant="square" src={resto} />
+                                  )}
+                                </TableCell>
+                                <TableCell component="th" id={labelId} scope="row" padding="none">
+                                    {row.jogador.nome}
+                                </TableCell>
+                                <TableCell align="right" padding="none" scope="row" component="th" id={labelId}>
+                                  {row.jogador.pontos}
+                                </TableCell>
+                                </TableRow>
+                            );
+                            })}
+                        {emptyRows > 0 && (
+                            <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
+                            <TableCell colSpan={6} />
+                            </TableRow>
+                        )}
+                        </TableBody>
+                    </Table>
+                    </TableContainer>
+                    <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={dados.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                    />
+                </Paper>
+            </div>
+        </Container>
+        {/* Fim tabela */}
 
         {/* Inicio Dialog */}
-          <Dialog open={open} onClose={handleClose} fullScreen={true} >
-            <DialogTitle>Balanço Patrimonial</DialogTitle>
-            <DialogContent>
-                <BalancoJogador />
+        <div>
+            <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" fullScreen={true}>
+                <DialogTitle id="form-dialog-title">Balanco Patrimonial</DialogTitle>
+                <DialogContent>
+                  <BalancoJogador/>
+                </DialogContent>
                 <DialogActions>
                 <Button onClick={handleClose} color="primary">
                     Sair
                 </Button>
-              </DialogActions>
-            </DialogContent>
-          </Dialog>
+                </DialogActions>
+            </Dialog>
+        </div>
         {/* Fim Dialog */}
-      </Fragment>
+    </Fragment>
   );
 }

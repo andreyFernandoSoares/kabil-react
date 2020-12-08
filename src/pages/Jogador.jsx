@@ -22,6 +22,7 @@ export default function Jogador() {
     setTimeout(() => {
       api.get(`/sala/${codigo}`)
       .then(({ data }) => {
+        console.log(data);
         montaFormularios(data);
       })
       .catch((error) => {
@@ -91,7 +92,6 @@ export default function Jogador() {
           <Step><StepLabel>Atividade</StepLabel></Step>
           <Step><StepLabel>Finalizar</StepLabel></Step>
        </Stepper>
-       {etapaAtual}
        {formularios[etapaAtual]}
      </Fragment>
   );
